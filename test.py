@@ -1,4 +1,4 @@
-from reccomender import Model1, Model2
+from recommender import Model1, Model2
 
 song_ratings = [
     {"track_id": "0e7ipj03S05BNilyu5bRzt", "track_name": "rockstar (feat. 21 Savage)", "rating": 4},
