@@ -116,87 +116,102 @@ def add_bins(df: pd.DataFrame) -> pd.DataFrame:
 TRACK_DF = add_bins(TRACK_DF)
 
 # ================================================================
-# 2. PART 1'DEN OLASILIKLAR
+# 2. PART 1'DEN OLASILIKLAR (GÜNCEL)
 # ================================================================
-P_explicit = {False: 0.392155, True: 0.082317}
+
+P_explicit = {
+    False: 0.241606,
+    True: 0.214669
+}
 
 P_year_bin = {
-    "2000s": 0.471910,
-    "2010s": 0.365425,
-    "1990s": 0.210654,
-    "2020s": 0.155361,
-    "1980s": 0.068670,
-    "pre_1980": 0.039711,
+    "1990s": 0.345238,
+    "pre_1980": 0.315217,
+    "1980s": 0.265823,
+    "2000s": 0.262238,
+    "2010s": 0.216856,
+    "2020s": 0.211765,
 }
 
 P_popularity_bin = {
-    "very_high": 0.446358,
-    "high": 0.390074,
-    "low": 0.320666,
-    "very_low": 0.203896,
+    "very_high": 0.313776,
+    "high": 0.255474,
+    "low": 0.191358,
+    "very_low": 0.191321,
 }
 
 P_duration_bin = {
-    "short": 0.220986,
-    "medium": 0.356762,
-    "long": 0.303730,
+    "long": 0.379845,
+    "medium": 0.232262,
+    "short": 0.181818,
 }
 
 P_markets_bin = {
-    "few": 0.355663,
-    "many": 0.320277,
+    "medium": 0.264610,
+    "few": 0.230137,
+    "many": 0.206186,
 }
 
 P_feature = {
-    "danceable": 0.318484,
-    "not_danceable": 0.371376,
-    "acoustic": 0.365523,
-    "not_acoustic": 0.324938,
-    "aggressive": 0.291925,
-    "not_aggressive": 0.335862,
-    "electronic": 0.322233,
-    "not_electronic": 0.353442,
-    "happy": 0.349250,
-    "not_happy": 0.325743,
-    "party": 0.300887,
-    "not_party": 0.349962,
-    "relaxed": 0.337026,
-    "not_relaxed": 0.323020,
-    "sad": 0.326766,
-    "not_sad": 0.334915,
-    "female": 0.334846,
-    "male": 0.328061,
-    "instrumental": 0.354535,
-    "voice": 0.321097,
-    "bright": 0.351262,
-    "dark": 0.312401,
+    # Danceability
+    "not_danceable": 0.304505,
+    "danceable": 0.205240,
+    # Acousticness
+    "not_acoustic": 0.233881,
+    "acoustic": 0.233429,
+    # Aggressiveness
+    "not_aggressive": 0.236456,
+    "aggressive": 0.203822,
+    # Electronic
+    "electronic": 0.242984,
+    "not_electronic": 0.212174,
+    # Happy
+    "not_happy": 0.239706,
+    "happy": 0.219684,
+    # Party
+    "not_party": 0.252941,
+    "party": 0.202977,
+    # Relaxed
+    "relaxed": 0.244160,
+    "not_relaxed": 0.210963,
+    # Sadness
+    "not_sad": 0.238551,
+    "sad": 0.218884,
+    # Gender
+    "male": 0.258467,
+    "female": 0.223684,
+    # Voice/Instrumental
+    "instrumental": 0.273438,
+    "voice": 0.214119,
+    # Timbre
+    "dark": 0.261445,
+    "bright": 0.205074,
 }
 
 P_genre_dortmund = {
-    "alternative": 0.477273,
-    "electronic": 0.334612,
-    "folkcountry": 0.300613,
-    "rock": 0.239130,
-    "jazz": 0.200000,
-    "raphiphop": 0.076923,
-    "blues": 0.066667,
+    "jazz": 0.500000,
+    "blues": 0.400000,
+    "rock": 0.375000,
+    "alternative": 0.272727,
+    "electronic": 0.234979,
+    "folkcountry": 0.155556,
 }
 
 P_genre_ros = {
-    "cla": 0.404580,
-    "pop": 0.380163,
-    "roc": 0.346552,
-    "dan": 0.337972,
-    "jaz": 0.320000,
-    "rhy": 0.291062,
-    "hip": 0.278988,
+    "roc": 0.307317,
+    "jaz": 0.272727,
+    "hip": 0.270833,
+    "cla": 0.240000,
+    "pop": 0.225115,
+    "dan": 0.225000,
+    "rhy": 0.204778,
 }
 
 # ================================================================
 # 3. PART 2 PARAMETRELERİ (BETA-GEOMETRIC)
 # ================================================================
-ALPHA = 3.0535
-BETA = 5.6081
+ALPHA = 1.0000 #3.0535
+BETA = 1.0000 #5.6081
 EXPECTED_P = ALPHA / (ALPHA + BETA)   # ≈ 0.3525
 
 
@@ -288,65 +303,65 @@ class Model1:
 class Model2:
     """
     Gelişmiş Birleşik Model: Part 1 + Part 2 + Kişiselleştirme
-    
+
     Model 1'in yaptığı her şeyi yapar + Part 2'nin sabır modelini ekler.
-    
+
     Bileşenler:
     1. GLOBAL: Part 1'den feature-based P(5★) hesaplaması
     2. PERSONAL: Genre/artist bonusları (Model 1 gibi)
     3. PATIENCE: Beta-Geometric sabır modeli ile exploration/exploitation dengesi
-    
+
     Formül:
     Score = Global_P(5★) × Genre_Bonus × Artist_Bonus × Patience_Factor
-    
+
     Sabır Modeli (Part 2):
     - Tu = Kullanıcının 5★ şarkı bulması için beklenen öneri sayısı
     - p ~ Beta(α, β) → Kullanıcının 5★ verme olasılığı
     - Sabırlı (düşük p, yüksek Tu): exploration bonus
     - Sabırsız (yüksek p, düşük Tu): exploitation bonus
     """
-    
+
     def __init__(self):
         self.tracks = TRACK_DF
-    
+
     def _estimate_user_patience(self, song_ratings):
         """
         Part 2: Beta-Geometric modeline göre kullanıcının p değerini ve Tu'yu tahmin et.
-        
+
         Bayesian Update:
         Prior: p ~ Beta(ALPHA, BETA)
         Likelihood: X ~ Bernoulli(p) for each 5★ rating
         Posterior: p | data ~ Beta(ALPHA + n_fives, BETA + n_not_fives)
-        
+
         Returns: (estimated_p, expected_Tu)
         """
         if not song_ratings:
             return EXPECTED_P, 1.0 / EXPECTED_P
-        
+
         n_total = len(song_ratings)
         n_fives = sum(1 for s in song_ratings if s["rating"] == 5)
-        
+
         # Bayesian posterior update
         alpha_post = ALPHA + n_fives
         beta_post = BETA + (n_total - n_fives)
-        
+
         # Posterior mean: E[p | data]
         estimated_p = alpha_post / (alpha_post + beta_post)
-        
+
         # Expected Tu (Geometric): E[Tu] = 1/p
         expected_Tu = 1.0 / estimated_p
-        
+
         return estimated_p, expected_Tu
-    
+
     def _compute_patience_factor(self, base_score, estimated_p, expected_Tu):
         """
         Part 2: Sabır modeline göre exploration/exploitation faktörü.
-        
+
         Sabır Tipi Belirleme (Tu bazlı):
         - Tu < 2.5 → Sabırsız (çok seçici değil, hızlı beğenir)
         - Tu > 4.0 → Sabırlı (seçici, uzun süre arar)
         - Arada → Normal
-        
+
         Strateji:
         - Sabırsız kullanıcı: Zaten çabuk beğeniyor, exploration şansı ver
           → Yüksek skorlara hafif penalty, orta skorlara bonus
@@ -363,9 +378,9 @@ class Model2:
             else:
                 # Orta skorlar: exploration bonus
                 factor = 1.0 + 0.15 * (1 - base_score)
-                
+
         elif expected_Tu > 4.0:
-            # Sabırlı kullanıcı - exploitation reward  
+            # Sabırlı kullanıcı - exploitation reward
             # Bu kullanıcı seçici, güvenli/yüksek skorlu şarkılar öner
             # Yüksek skorlara büyük bonus
             if base_score > 0.5:
@@ -375,13 +390,13 @@ class Model2:
         else:
             # Normal kullanıcı - dengeli
             factor = 1.0
-        
+
         return factor
-    
+
     def query(self, song_ratings, topk=5):
         """
         Global + Personal + Patience birleşik öneri.
-        
+
         Model 1'in yaptığı her şeyi yapıp üzerine sabır modelini ekler.
         """
         # ========================================
@@ -389,78 +404,78 @@ class Model2:
         # ========================================
         liked_genres = set()
         liked_artists = set()
-        
+
         for s in song_ratings:
             if s["rating"] >= 4:
                 row = self.tracks[self.tracks["track_id"] == s["track_id"]]
                 if len(row) > 0:
                     liked_genres.add(row.iloc[0]["ab_genre_rosamerica_value"])
                     liked_artists.add(row.iloc[0]["primary_artist_name"])
-        
+
         # ========================================
         # STEP 2: Sabır Tahmini (Part 2)
         # ========================================
         estimated_p, expected_Tu = self._estimate_user_patience(song_ratings)
-        
+
         # ========================================
         # STEP 3: Aday Şarkıları Filtrele
         # ========================================
         rated_ids = set(s["track_id"] for s in song_ratings)
         df = self.tracks[~self.tracks["track_id"].isin(rated_ids)].copy()
-        
+
         if len(df) == 0:
             df = self.tracks.copy()
-        
+
         # ========================================
         # STEP 4: Her Şarkı için Combined Score Hesapla
         # ========================================
         scores = []
-        
+
         for _, track in df.iterrows():
             # --- A. Global P(5★) - Part 1 ---
             global_p5 = compute_global_probability(track)
-            
+
             # --- B. Genre Bonus (Model 1 gibi) ---
             genre = track.get("ab_genre_rosamerica_value", "")
             if liked_genres and genre in liked_genres:
                 genre_bonus = 1.4  # Beğenilen genre: %40 bonus
             else:
                 genre_bonus = 1.0
-            
+
             # --- C. Artist Bonus (Model 1 gibi) ---
             artist = track.get("primary_artist_name", "")
             if liked_artists and artist in liked_artists:
                 artist_bonus = 1.6  # Beğenilen artist: %60 bonus
             else:
                 artist_bonus = 1.0
-            
+
             # --- D. Base Score (Global × Personal) ---
             base_score = global_p5 * genre_bonus * artist_bonus
-            
+
             # --- E. Patience Factor (Part 2) ---
             patience_factor = self._compute_patience_factor(base_score, estimated_p, expected_Tu)
-            
+
             # --- F. Final Combined Score ---
             final_score = base_score * patience_factor
-            
+
             scores.append(final_score)
-        
+
         df["score"] = scores
-        
+
         # ========================================
         # STEP 5: Top-K Seçimi (Sabır tipine göre)
         # ========================================
         if expected_Tu > 4.0:
             # Sabırlı kullanıcı: Direkt en yüksek skorlar (exploit)
             recs = df.nlargest(topk, "score")
-            
+
         elif expected_Tu < 2.5:
             # Sabırsız kullanıcı: Weighted sampling for diversity (explore)
             top_candidates = df.nlargest(min(25, len(df)), "score")
             weights = top_candidates["score"].values
             weights = np.maximum(weights, 1e-10)  # Sıfır olmaması için
             weights = weights / weights.sum()
-            
+
             sample_size = min(topk, len(top_candidates))
             sample_idx = np.random.choice(
                 len(top_candidates),
@@ -469,14 +484,14 @@ class Model2:
                 p=weights
             )
             recs = top_candidates.iloc[sample_idx].nlargest(topk, "score")
-            
+
         else:
             # Normal kullanıcı: Hybrid (%80 exploit + %20 explore)
             n_exploit = max(1, int(topk * 0.8))
             n_explore = topk - n_exploit
-            
+
             top_recs = df.nlargest(n_exploit, "score")
-            
+
             if n_explore > 0:
                 remaining = df[~df["track_id"].isin(top_recs["track_id"])]
                 if len(remaining) > 0:
@@ -484,7 +499,7 @@ class Model2:
                     weights = explore_pool["score"].values
                     weights = np.maximum(weights, 1e-10)
                     weights = weights / weights.sum()
-                    
+
                     explore_size = min(n_explore, len(explore_pool))
                     explore_idx = np.random.choice(
                         len(explore_pool),
@@ -498,7 +513,7 @@ class Model2:
                     recs = top_recs.head(topk)
             else:
                 recs = top_recs.head(topk)
-        
+
         return list(zip(recs["track_id"], recs["track_name"]))
 
 
@@ -511,6 +526,3 @@ def query(song_ratings, topk=5):
     """
     model = Model2()
     return model.query(song_ratings, topk)
-
-
-
