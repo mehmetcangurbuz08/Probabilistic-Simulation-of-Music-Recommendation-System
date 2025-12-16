@@ -15,17 +15,66 @@ from recommender import (
 )
 
 # ============================================================
-# KULLANICI TERCİH ÖZELLİKLERİ
-# Her kullanıcı bu özellikler için farklı tercihlere sahip olacak
+# KULLANICI TERCİH ÖZELLİKLERİ - GENİŞLETİLMİŞ VERSİYON
+# Part 1'deki tüm binning'ler ve audio özellikleri dahil
 # ============================================================
-USER_PREF_FEATURES = [
-    "danceability",
-    "energy",
-    "valence",         # mutluluk/pozitiflik
-    "acousticness",
-    "instrumentalness",
-    "tempo_normalized",  # normalize edilecek
+
+# 1. SÜREKLİ ÖZELLİKLER (0-1 arası normalize edilecek)
+CONTINUOUS_PREF_FEATURES = [
+    "track_popularity_norm",   # 0-100 → 0-1
+    "duration_norm",           # ms → 0-1 (0-10 dk arası)
+    "available_markets_norm",  # 0-200 → 0-1
 ]
+
+# 2. KATEGORİK ÖZELLİKLER (kullanıcının tercih ettiği kategoriler)
+# Her kullanıcı bu kategorilerden bazılarını tercih edecek
+CATEGORICAL_PREF_FEATURES = {
+    # Genre tercihleri (Part 1'deki genre binning)
+    "ab_genre_rosamerica_value": [
+        "hip", "rhy", "roc", "pop", "dan", "cla", "jaz", "reg", "cou", "lat", "met", "ele"
+    ],
+    # Dortmund genre
+    "ab_genre_dortmund_value": [
+        "alternative", "blues", "electronic", "folkcountry", "funksoulrnb", 
+        "jazz", "pop", "raphiphop", "rock", "schlager"
+    ],
+    # Mood: Acoustic
+    "ab_mood_acoustic_value": ["acoustic", "not_acoustic"],
+    # Mood: Aggressive
+    "ab_mood_aggressive_value": ["aggressive", "not_aggressive"],
+    # Mood: Electronic
+    "ab_mood_electronic_value": ["electronic", "not_electronic"],
+    # Mood: Happy
+    "ab_mood_happy_value": ["happy", "not_happy"],
+    # Mood: Party
+    "ab_mood_party_value": ["party", "not_party"],
+    # Mood: Relaxed
+    "ab_mood_relaxed_value": ["relaxed", "not_relaxed"],
+    # Mood: Sad
+    "ab_mood_sad_value": ["sad", "not_sad"],
+    # Danceability
+    "ab_danceability_value": ["danceable", "not_danceable"],
+    # Voice vs Instrumental
+    "ab_voice_instrumental_value": ["voice", "instrumental"],
+    # Timbre
+    "ab_timbre_value": ["bright", "dark"],
+    # Gender (vocal)
+    "ab_gender_value": ["female", "male"],
+}
+
+# 3. YIL TERCİHİ (Part 1'deki year_bin)
+YEAR_BINS = ["pre_1980", "1980s", "1990s", "2000s", "2010s", "2020s"]
+YEAR_BIN_RANGES = {
+    "pre_1980": (0, 1979),
+    "1980s": (1980, 1989),
+    "1990s": (1990, 1999),
+    "2000s": (2000, 2009),
+    "2010s": (2010, 2019),
+    "2020s": (2020, 2030),
+}
+
+# Eski liste (backward compatibility için)
+USER_PREF_FEATURES = CONTINUOUS_PREF_FEATURES
 
 # ============================================================
 # 0. GLOBAL AYARLAR
@@ -75,32 +124,78 @@ TRACK_P5 = precompute_track_p5()
 
 
 # ============================================================
-# 1b. HER TRACK İÇİN ÖZELLİK VEKTÖRLERİ
+# 1b. HER TRACK İÇİN GENİŞLETİLMİŞ ÖZELLİK VEKTÖRLERİ
 # ============================================================
-def precompute_track_features() -> Dict[str, Dict[str, float]]:
+def precompute_track_features() -> Dict[str, Dict]:
     """
-    Her şarkı için normalize edilmiş özellik vektörünü hesaplar.
-    Kullanıcı-şarkı eşleşmesi için kullanılacak.
+    Her şarkı için genişletilmiş özellik vektörünü hesaplar.
+    
+    İçerir:
+    1. Sürekli özellikler (normalize edilmiş)
+    2. Kategorik özellikler (genre, mood, vb.)
+    3. Yıl bilgisi (bin olarak)
     """
     df = TRACK_DF.copy()
     track_features = {}
     
     for _, row in df.iterrows():
         tid = row["track_id"]
-        features = {}
+        features = {
+            "continuous": {},
+            "categorical": {},
+            "year_bin": None,
+        }
         
-        # Doğrudan 0-1 aralığında olan özellikler
-        for feat in ["danceability", "energy", "valence", "acousticness", "instrumentalness"]:
-            if feat in row and pd.notna(row[feat]):
-                features[feat] = float(np.clip(row[feat], 0, 1))
-            else:
-                features[feat] = 0.5  # varsayılan orta değer
+        # ========================================
+        # A. SÜREKLİ ÖZELLİKLER
+        # ========================================
         
-        # Tempo: 0-250 BPM aralığını 0-1'e normalize et
-        if "tempo" in row and pd.notna(row["tempo"]):
-            features["tempo_normalized"] = float(np.clip(row["tempo"] / 200.0, 0, 1))
+        # Track popularity: 0-100 → 0-1
+        if "track_popularity" in row and pd.notna(row["track_popularity"]):
+            features["continuous"]["track_popularity_norm"] = float(
+                np.clip(row["track_popularity"] / 100.0, 0, 1)
+            )
         else:
-            features["tempo_normalized"] = 0.5
+            features["continuous"]["track_popularity_norm"] = 0.5
+        
+        # Duration: 0-600000ms (10dk) → 0-1
+        if "duration_ms" in row and pd.notna(row["duration_ms"]):
+            features["continuous"]["duration_norm"] = float(
+                np.clip(row["duration_ms"] / 600000.0, 0, 1)
+            )
+        else:
+            features["continuous"]["duration_norm"] = 0.5
+        
+        # Available markets: 0-200 → 0-1
+        if "available_markets_count" in row and pd.notna(row["available_markets_count"]):
+            features["continuous"]["available_markets_norm"] = float(
+                np.clip(row["available_markets_count"] / 200.0, 0, 1)
+            )
+        else:
+            features["continuous"]["available_markets_norm"] = 0.5
+        
+        # ========================================
+        # B. KATEGORİK ÖZELLİKLER
+        # ========================================
+        for cat_feature, possible_values in CATEGORICAL_PREF_FEATURES.items():
+            if cat_feature in row and pd.notna(row[cat_feature]):
+                features["categorical"][cat_feature] = str(row[cat_feature]).lower()
+            else:
+                features["categorical"][cat_feature] = None
+        
+        # ========================================
+        # C. YIL BİN
+        # ========================================
+        if "album_release_year" in row and pd.notna(row["album_release_year"]):
+            year = int(row["album_release_year"])
+            for bin_name, (low, high) in YEAR_BIN_RANGES.items():
+                if low <= year <= high:
+                    features["year_bin"] = bin_name
+                    break
+            if features["year_bin"] is None:
+                features["year_bin"] = "2020s"  # default
+        else:
+            features["year_bin"] = "2010s"  # default
         
         track_features[tid] = features
     
@@ -112,58 +207,194 @@ TRACK_FEATURES = precompute_track_features()
 
 # ============================================================
 # 2. KULLANICI DAVRANIŞI SİMÜLASYONU
-#    (Part 2 — Beta-Geometric ile bağlantı + Özellik-Bazlı Tercihler)
+#    (Part 2 — Beta-Geometric ile bağlantı + Genişletilmiş Tercihler)
 # ============================================================
-def generate_user_preferences() -> Dict[str, float]:
+def generate_user_preferences() -> Dict:
     """
-    Her kullanıcı için özellik tercihlerini simüle eder.
-    Her özellik için Beta(2, 2) dağılımından tercih seviyesi çekilir.
-    Bu, kullanıcının o özelliği ne kadar sevdiğini belirler.
+    Her kullanıcı için genişletilmiş tercih profili oluşturur.
     
-    Örnek:
-        - danceability tercihi 0.8 olan kullanıcı dans edilebilir şarkıları sever
-        - energy tercihi 0.2 olan kullanıcı sakin şarkıları tercih eder
+    İçerir:
+    1. Sürekli tercihler: popularity, duration, markets (0-1 arası)
+    2. Kategorik tercihler: tercih edilen genre, mood vb. setleri
+    3. Yıl tercihi: tercih edilen dönemler
+    
+    Bu sayede her kullanıcı gerçekçi ve spesifik bir profile sahip olur.
     """
-    prefs = {}
-    for feat in USER_PREF_FEATURES:
-        # Beta(2, 2) -> ortalama 0.5, ama çeşitlilik var
-        prefs[feat] = np.random.beta(2, 2)
+    prefs = {
+        "continuous": {},
+        "categorical": {},
+        "year_preferences": {},
+    }
+    
+    # ========================================
+    # A. SÜREKLİ TERCİHLER
+    # ========================================
+    # Her sürekli özellik için kullanıcının tercih seviyesi
+    for feat in CONTINUOUS_PREF_FEATURES:
+        # Beta(2, 2) → ortalama 0.5, ama çeşitlilik var
+        prefs["continuous"][feat] = np.random.beta(2, 2)
+    
+    # ========================================
+    # B. KATEGORİK TERCİHLER
+    # ========================================
+    # Her kategorik özellik için kullanıcının tercih ettiği değerler
+    for cat_feature, possible_values in CATEGORICAL_PREF_FEATURES.items():
+        # Her kategorik özellik için:
+        # - Kullanıcı bazı değerleri tercih eder (liked)
+        # - Bazılarına nötr (neutral) 
+        # - Bazılarını sevmez (disliked)
+        
+        n_values = len(possible_values)
+        
+        if n_values == 2:
+            # Binary özellik (acoustic/not_acoustic gibi)
+            # %70 ihtimalle birini tercih et, %30 nötr
+            if np.random.rand() < 0.7:
+                preferred = np.random.choice(possible_values)
+                prefs["categorical"][cat_feature] = {
+                    "liked": {preferred},
+                    "disliked": set(possible_values) - {preferred},
+                    "weight": np.random.uniform(0.6, 1.0),  # Bu tercihin önemi
+                }
+            else:
+                prefs["categorical"][cat_feature] = {
+                    "liked": set(),
+                    "disliked": set(),
+                    "weight": 0.0,  # Umursamıyor
+                }
+        else:
+            # Multi-value özellik (genre gibi)
+            # 1-3 tane tercih et, 0-2 tane sevme
+            n_liked = np.random.randint(1, min(4, n_values))
+            n_disliked = np.random.randint(0, min(3, n_values - n_liked))
+            
+            shuffled = np.random.permutation(possible_values)
+            liked = set(shuffled[:n_liked])
+            disliked = set(shuffled[n_liked:n_liked + n_disliked])
+            
+            prefs["categorical"][cat_feature] = {
+                "liked": liked,
+                "disliked": disliked,
+                "weight": np.random.uniform(0.5, 1.0),
+            }
+    
+    # ========================================
+    # C. YIL TERCİHLERİ
+    # ========================================
+    # Her kullanıcı belirli dönemleri tercih eder
+    # 1-3 tercih edilen dönem, 0-2 sevmeyen dönem
+    n_liked_years = np.random.randint(1, 4)
+    n_disliked_years = np.random.randint(0, 3)
+    
+    shuffled_years = np.random.permutation(YEAR_BINS)
+    liked_years = set(shuffled_years[:n_liked_years])
+    disliked_years = set(shuffled_years[n_liked_years:n_liked_years + n_disliked_years])
+    
+    prefs["year_preferences"] = {
+        "liked": liked_years,
+        "disliked": disliked_years,
+        "weight": np.random.uniform(0.4, 0.9),  # Yıl tercihinin önemi
+    }
+    
     return prefs
 
 
-def compute_user_track_match(user_prefs: Dict[str, float], track_id: str) -> float:
+def compute_user_track_match(user_prefs: Dict, track_id: str) -> float:
     """
     Kullanıcı tercihleri ile şarkı özellikleri arasındaki uyumu hesaplar.
     
-    Yüksek uyum = kullanıcının tercih ettiği özelliklere sahip şarkı
+    Genişletilmiş formül:
+    match_score = weighted_average(
+        continuous_match,    # Popularity, duration vs.
+        categorical_match,   # Genre, mood vs.
+        year_match,          # Dönem tercihi
+    )
     
-    Formül: 1 - ortalama(|user_pref - track_feature|)
-    Yani tercihler ve özellikler ne kadar yakınsa skor o kadar yüksek.
+    Her bileşen 0-1 arası, ağırlıklı ortalama alınır.
     """
-    track_feats = TRACK_FEATURES.get(track_id, {})
-    if not track_feats:
-        return 0.5  # varsayılan orta eşleşme
+    track_feats = TRACK_FEATURES.get(track_id, None)
+    if track_feats is None:
+        return 0.5  # Varsayılan orta eşleşme
     
-    total_diff = 0.0
-    count = 0
+    match_scores = []
+    weights = []
     
-    for feat in USER_PREF_FEATURES:
-        if feat in track_feats and feat in user_prefs:
-            # Kullanıcı bu özelliği ne kadar seviyor vs şarkıda ne kadar var
-            diff = abs(user_prefs[feat] - track_feats[feat])
-            total_diff += diff
-            count += 1
+    # ========================================
+    # A. SÜREKLİ ÖZELLİK UYUMU
+    # ========================================
+    continuous_diffs = []
+    for feat in CONTINUOUS_PREF_FEATURES:
+        user_val = user_prefs["continuous"].get(feat, 0.5)
+        track_val = track_feats["continuous"].get(feat, 0.5)
+        diff = abs(user_val - track_val)
+        continuous_diffs.append(diff)
     
-    if count == 0:
+    if continuous_diffs:
+        continuous_match = 1.0 - np.mean(continuous_diffs)
+        match_scores.append(continuous_match)
+        weights.append(0.2)  # Sürekli özelliklerin ağırlığı
+    
+    # ========================================
+    # B. KATEGORİK ÖZELLİK UYUMU
+    # ========================================
+    categorical_scores = []
+    categorical_weights = []
+    
+    for cat_feature, pref_info in user_prefs["categorical"].items():
+        if pref_info["weight"] == 0:
+            continue  # Bu özellik umurunda değil
+        
+        track_val = track_feats["categorical"].get(cat_feature)
+        if track_val is None:
+            continue
+        
+        # Eşleşme skoru: liked=1, neutral=0.5, disliked=0
+        if track_val in pref_info["liked"]:
+            score = 1.0
+        elif track_val in pref_info["disliked"]:
+            score = 0.0
+        else:
+            score = 0.5  # Nötr
+        
+        categorical_scores.append(score)
+        categorical_weights.append(pref_info["weight"])
+    
+    if categorical_scores:
+        # Ağırlıklı ortalama
+        total_weight = sum(categorical_weights)
+        categorical_match = sum(
+            s * w for s, w in zip(categorical_scores, categorical_weights)
+        ) / total_weight
+        match_scores.append(categorical_match)
+        weights.append(0.5)  # Kategorik özelliklerin ağırlığı (en önemli!)
+    
+    # ========================================
+    # C. YIL TERCİHİ UYUMU
+    # ========================================
+    year_pref = user_prefs["year_preferences"]
+    track_year = track_feats["year_bin"]
+    
+    if year_pref["weight"] > 0 and track_year:
+        if track_year in year_pref["liked"]:
+            year_match = 1.0
+        elif track_year in year_pref["disliked"]:
+            year_match = 0.0
+        else:
+            year_match = 0.5
+        
+        match_scores.append(year_match)
+        weights.append(0.3 * year_pref["weight"])  # Yıl tercihinin ağırlığı
+    
+    # ========================================
+    # FINAL WEIGHTED AVERAGE
+    # ========================================
+    if not match_scores:
         return 0.5
     
-    # Ortalama fark: 0 = mükemmel eşleşme, 1 = tamamen uyumsuz
-    avg_diff = total_diff / count
+    total_weight = sum(weights)
+    final_match = sum(s * w for s, w in zip(match_scores, weights)) / total_weight
     
-    # Eşleşme skoru: 0 = uyumsuz, 1 = mükemmel
-    match_score = 1.0 - avg_diff
-    
-    return float(match_score)
+    return float(final_match)
 
 
 def sample_user_patience(alpha: float, beta: float, max_t: int = 50) -> int:
@@ -301,23 +532,138 @@ class UserProfile:
     def _learn_preferences_from_warmup(self) -> None:
         """
         Warm-up verilerinden kullanıcı tercihlerini öğrenir.
-        Yüksek puanlı şarkıların (4-5★) özelliklerinin ortalamasını alır.
+        
+        Genişletilmiş öğrenme:
+        1. Sürekli özellikler: Beğenilen şarkıların ortalaması
+        2. Kategorik özellikler: Beğenilen şarkılardaki değerlerin frekansı
+        3. Yıl tercihi: Beğenilen şarkıların dönemleri
         """
-        liked_features = {feat: [] for feat in USER_PREF_FEATURES}
+        # Beğenilen ve beğenilmeyen şarkıları ayır
+        liked_track_ids = [
+            tid for tid, rating in zip(self.warmup_tracks, self.warmup_ratings)
+            if rating >= 4
+        ]
+        disliked_track_ids = [
+            tid for tid, rating in zip(self.warmup_tracks, self.warmup_ratings)
+            if rating <= 2
+        ]
         
-        for tid, rating in zip(self.warmup_tracks, self.warmup_ratings):
-            if rating >= 4:  # Beğenilen şarkılar
-                track_feats = TRACK_FEATURES.get(tid, {})
-                for feat in USER_PREF_FEATURES:
-                    if feat in track_feats:
-                        liked_features[feat].append(track_feats[feat])
+        self.learned_preferences = {
+            "continuous": {},
+            "categorical": {},
+            "year_preferences": {},
+        }
         
-        # Ortalama al veya varsayılan kullan
-        for feat in USER_PREF_FEATURES:
-            if liked_features[feat]:
-                self.learned_preferences[feat] = np.mean(liked_features[feat])
+        # ========================================
+        # A. SÜREKLİ ÖZELLİKLER
+        # ========================================
+        continuous_values = {feat: [] for feat in CONTINUOUS_PREF_FEATURES}
+        
+        for tid in liked_track_ids:
+            track_feats = TRACK_FEATURES.get(tid)
+            if track_feats:
+                for feat in CONTINUOUS_PREF_FEATURES:
+                    val = track_feats["continuous"].get(feat)
+                    if val is not None:
+                        continuous_values[feat].append(val)
+        
+        for feat in CONTINUOUS_PREF_FEATURES:
+            if continuous_values[feat]:
+                self.learned_preferences["continuous"][feat] = np.mean(continuous_values[feat])
             else:
-                self.learned_preferences[feat] = 0.5  # Varsayılan orta değer
+                self.learned_preferences["continuous"][feat] = 0.5
+        
+        # ========================================
+        # B. KATEGORİK ÖZELLİKLER
+        # ========================================
+        for cat_feature in CATEGORICAL_PREF_FEATURES.keys():
+            liked_values = []
+            disliked_values = []
+            
+            # Beğenilen şarkılardan değerleri topla
+            for tid in liked_track_ids:
+                track_feats = TRACK_FEATURES.get(tid)
+                if track_feats:
+                    val = track_feats["categorical"].get(cat_feature)
+                    if val:
+                        liked_values.append(val)
+            
+            # Beğenilmeyen şarkılardan değerleri topla
+            for tid in disliked_track_ids:
+                track_feats = TRACK_FEATURES.get(tid)
+                if track_feats:
+                    val = track_feats["categorical"].get(cat_feature)
+                    if val:
+                        disliked_values.append(val)
+            
+            # En sık görülen değerleri tercih olarak kaydet
+            liked_set = set()
+            disliked_set = set()
+            
+            if liked_values:
+                from collections import Counter
+                liked_counts = Counter(liked_values)
+                # En az 2 kez görülen veya %30+ oranında olanlar
+                threshold = max(2, len(liked_values) * 0.3)
+                liked_set = {v for v, c in liked_counts.items() if c >= threshold}
+            
+            if disliked_values:
+                from collections import Counter
+                disliked_counts = Counter(disliked_values)
+                threshold = max(2, len(disliked_values) * 0.3)
+                disliked_set = {v for v, c in disliked_counts.items() if c >= threshold}
+            
+            # Çakışmaları çöz (liked öncelikli)
+            disliked_set -= liked_set
+            
+            weight = min(1.0, len(liked_values) / 5.0) if liked_values else 0.0
+            
+            self.learned_preferences["categorical"][cat_feature] = {
+                "liked": liked_set,
+                "disliked": disliked_set,
+                "weight": weight,
+            }
+        
+        # ========================================
+        # C. YIL TERCİHLERİ
+        # ========================================
+        liked_years = []
+        disliked_years = []
+        
+        for tid in liked_track_ids:
+            track_feats = TRACK_FEATURES.get(tid)
+            if track_feats and track_feats["year_bin"]:
+                liked_years.append(track_feats["year_bin"])
+        
+        for tid in disliked_track_ids:
+            track_feats = TRACK_FEATURES.get(tid)
+            if track_feats and track_feats["year_bin"]:
+                disliked_years.append(track_feats["year_bin"])
+        
+        liked_year_set = set()
+        disliked_year_set = set()
+        
+        if liked_years:
+            from collections import Counter
+            year_counts = Counter(liked_years)
+            threshold = max(2, len(liked_years) * 0.25)
+            liked_year_set = {y for y, c in year_counts.items() if c >= threshold}
+        
+        if disliked_years:
+            from collections import Counter
+            year_counts = Counter(disliked_years)
+            threshold = max(2, len(disliked_years) * 0.25)
+            disliked_year_set = {y for y, c in year_counts.items() if c >= threshold}
+        
+        disliked_year_set -= liked_year_set
+        
+        weight = min(1.0, len(liked_years) / 5.0) if liked_years else 0.0
+        
+        self.learned_preferences["year_preferences"] = {
+            "liked": liked_year_set,
+            "disliked": disliked_year_set,
+            "weight": weight,
+        }
     
     def get_song_ratings_for_model(self) -> List[dict]:
         """
@@ -410,6 +756,7 @@ def run_personalized_monte_carlo(
     learned_patiences = []
     true_patiences = []
     preference_errors = []  # Öğrenilen vs gerçek tercih farkı
+    categorical_match_rates = []  # Kategorik tercih eşleşme oranı
     
     for i in range(n_users):
         # 1. Kullanıcı profili oluştur
@@ -424,13 +771,37 @@ def run_personalized_monte_carlo(
         user.do_warmup(warmup_tracks)
         learned_patiences.append(user.learned_patience)
         
-        # Tercih öğrenme hatası
+        # Tercih öğrenme hatası - GENİŞLETİLMİŞ
         pref_error = 0.0
-        for feat in USER_PREF_FEATURES:
-            true_val = user.true_preferences.get(feat, 0.5)
-            learned_val = user.learned_preferences.get(feat, 0.5)
+        error_count = 0
+        
+        # A. Sürekli özellik hatası
+        for feat in CONTINUOUS_PREF_FEATURES:
+            true_val = user.true_preferences["continuous"].get(feat, 0.5)
+            learned_val = user.learned_preferences["continuous"].get(feat, 0.5)
             pref_error += abs(true_val - learned_val)
-        pref_error /= len(USER_PREF_FEATURES)
+            error_count += 1
+        
+        # B. Kategorik tercih eşleşme oranı
+        cat_matches = 0
+        cat_total = 0
+        for cat_feature in CATEGORICAL_PREF_FEATURES.keys():
+            true_liked = user.true_preferences["categorical"].get(cat_feature, {}).get("liked", set())
+            learned_liked = user.learned_preferences["categorical"].get(cat_feature, {}).get("liked", set())
+            
+            if true_liked:
+                # Jaccard similarity
+                intersection = len(true_liked & learned_liked)
+                union = len(true_liked | learned_liked)
+                if union > 0:
+                    cat_matches += intersection / union
+                    cat_total += 1
+        
+        cat_match_rate = cat_matches / cat_total if cat_total > 0 else 0.5
+        categorical_match_rates.append(cat_match_rate)
+        
+        # Final tercih hatası
+        pref_error = pref_error / error_count if error_count > 0 else 0.5
         preference_errors.append(pref_error)
         
         # 3. Model'den öneri al (warm-up puanlarıyla)
@@ -466,6 +837,7 @@ def run_personalized_monte_carlo(
     learned_patiences = np.array(learned_patiences)
     true_patiences = np.array(true_patiences)
     preference_errors = np.array(preference_errors)
+    categorical_match_rates = np.array(categorical_match_rates)
     
     churn_rate = churns.mean()
     satisfaction_rate = hits.mean() * (1 - churn_rate)
@@ -480,6 +852,7 @@ def run_personalized_monte_carlo(
         "avg_learned_patience": learned_patiences.mean(),
         "avg_true_patience": true_patiences.mean(),
         "avg_preference_error": preference_errors.mean(),
+        "avg_categorical_match": categorical_match_rates.mean(),
     }
 
 
@@ -547,9 +920,14 @@ def print_personalized_comparison(
     print("\n" + "-" * 75)
     print("ÖĞRENME KALİTESİ (Warm-up Fazından)")
     print("-" * 75)
-    print(f"  Ortalama Öğrenilen Sabır: {results1['avg_learned_patience']:.2f} şarkı")
-    print(f"  Ortalama Gerçek Sabır   : {results1['avg_true_patience']:.2f} şarkı")
-    print(f"  Tercih Öğrenme Hatası   : {results1['avg_preference_error']:.3f} (0=mükemmel)")
+    print(f"  Ortalama Öğrenilen Sabır     : {results1['avg_learned_patience']:.2f} şarkı")
+    print(f"  Ortalama Gerçek Sabır        : {results1['avg_true_patience']:.2f} şarkı")
+    print(f"  Sürekli Tercih Hatası        : {results1['avg_preference_error']:.3f} (0=mükemmel)")
+    print(f"  Kategorik Tercih Eşleşmesi   : {results1['avg_categorical_match']:.3f} (1=mükemmel)")
+    print(f"\n  [Kullanılan Özellik Grupları]")
+    print(f"    • Sürekli     : popularity, duration, markets ({len(CONTINUOUS_PREF_FEATURES)} özellik)")
+    print(f"    • Kategorik   : genre, mood, danceability... ({len(CATEGORICAL_PREF_FEATURES)} özellik)")
+    print(f"    • Yıl tercihi : {', '.join(YEAR_BINS)}")
 
     print("\n" + "-" * 75)
     print(f"MODEL KARŞILAŞTIRMASI")
@@ -619,7 +997,7 @@ def print_personalized_comparison(
 def main():
     print("=" * 75)
     print("MONTE CARLO DEĞERLENDİRMESİ - KİŞİSELLEŞTİRİLMİŞ VERSİYON")
-    print("Part 1 (Global P(5★)) + Part 2 (Tu-Based Sabır) + Kişisel Tercihler")
+    print("Part 1 (Global P(5★)) + Part 2 (Tu-Based Sabır) + Genişletilmiş Tercihler")
     print("=" * 75)
     
     print(f"\n[AYARLAR]")
@@ -628,6 +1006,17 @@ def main():
     print(f"  Test şarkı sayısı      : {TOPK}")
     print(f"  Beta parametreleri     : α={ALPHA:.2f}, β={BETA:.2f}")
     print(f"  Beklenen E[p]          : {EXPECTED_P:.3f}")
+    
+    print(f"\n[GENİŞLETİLMİŞ TERCİH ÖZELLİKLERİ]")
+    print(f"  Sürekli Özellikler     : {len(CONTINUOUS_PREF_FEATURES)} adet")
+    print(f"    → {', '.join(CONTINUOUS_PREF_FEATURES)}")
+    print(f"  Kategorik Özellikler   : {len(CATEGORICAL_PREF_FEATURES)} adet")
+    print(f"    → Genre (rosamerica, dortmund)")
+    print(f"    → Mood (acoustic, aggressive, electronic, happy, party, relaxed, sad)")
+    print(f"    → Danceability, Voice/Instrumental, Timbre, Gender")
+    print(f"  Yıl Tercihleri         : {len(YEAR_BINS)} dönem")
+    print(f"    → {', '.join(YEAR_BINS)}")
+    
     print(f"\n[P(5★) FORMÜLÜ]")
     print(f"  Global Ağırlık         : {GLOBAL_WEIGHT:.0%}  (Part 1: şarkı kalitesi)")
     print(f"  Kişisel Ağırlık        : {PERSONAL_WEIGHT:.0%}  (kullanıcı-şarkı uyumu)")
@@ -638,7 +1027,7 @@ def main():
     results_m1 = run_personalized_monte_carlo(Model1, N_USERS, TOPK)
     print(f"    Tamamlandı. Hit@{TOPK}: {results_m1['hit_at_k'].mean():.3f}")
 
-    print("\n>>> Model 2 (Utility Sampling) çalıştırılıyor...")
+    print("\n>>> Model 2 (Advanced Combined) çalıştırılıyor...")
     results_m2 = run_personalized_monte_carlo(Model2, N_USERS, TOPK)
     print(f"    Tamamlandı. Hit@{TOPK}: {results_m2['hit_at_k'].mean():.3f}")
 
@@ -646,7 +1035,7 @@ def main():
     print_personalized_comparison(
         results_m1, results_m2,
         model1_name="Model1 (Conditional)",
-        model2_name="Model2 (Utility)",
+        model2_name="Model2 (Advanced)",
         k=TOPK
     )
 
