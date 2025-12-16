@@ -283,32 +283,181 @@ class Model1:
 
 
 # ================================================================
-# 6. MODEL 2 — Utility Sampling (Probabilistic)
+# 6. MODEL 2 — Utility-Based Sampling with Patience Model (Part 2)
 # ================================================================
 class Model2:
+    """
+    Part 2 Odaklı Model: Beta-Geometric Sabır Modeli + Utility Sampling
+    
+    Part 2'nin Temel Konseptleri:
+    1. Tu = Kullanıcının 5★ vermesi için gereken öneri sayısı
+    2. Her kullanıcının kendi p'si var: p ~ Beta(α, β)
+    3. Sabırlı kullanıcılar (yüksek Tu) → exploration yapılabilir
+    4. Sabırsız kullanıcılar (düşük Tu) → exploitation önemli
+    
+    Strateji:
+    - Kullanıcının warm-up verisinden sabır tipini tahmin et
+    - Sabırlı kullanıcılara riskli/keşif önerileri sun
+    - Sabırsız kullanıcılara güvenli/yüksek P(5★) öneriler sun
+    """
+    
     def __init__(self):
         self.tracks = TRACK_DF
-
+    
+    def _estimate_user_patience_type(self, song_ratings):
+        """
+        Part 2'deki Beta-Geometric modeline göre kullanıcının sabır tipini tahmin et.
+        
+        Warm-up verisinden:
+        - n_fives / n_total → kullanıcının hit rate'i
+        - Bu oran düşükse → seçici/sabırlı kullanıcı (düşük p, yüksek E[Tu])
+        - Bu oran yüksekse → kolay beğenen/sabırsız kullanıcı (yüksek p, düşük E[Tu])
+        
+        Returns:
+            estimated_p: Kullanıcının tahmini hit olasılığı
+            expected_Tu: Beklenen Time-to-5★
+            patience_type: "patient", "normal", "impatient"
+        """
+        if not song_ratings:
+            # Veri yoksa prior kullan
+            return EXPECTED_P, 1.0 / EXPECTED_P, "normal"
+        
+        n_total = len(song_ratings)
+        n_fives = sum(1 for s in song_ratings if s["rating"] == 5)
+        
+        # Bayesian güncelleme: Posterior Beta(α', β')
+        # Prior: Beta(ALPHA, BETA) → Part 2'den
+        # Likelihood: n_fives başarı, n_total - n_fives başarısızlık
+        alpha_post = ALPHA + n_fives
+        beta_post = BETA + (n_total - n_fives)
+        
+        # Posterior ortalama: E[p | data]
+        estimated_p = alpha_post / (alpha_post + beta_post)
+        
+        # Beklenen Tu (Geometric): E[Tu] = 1/p
+        expected_Tu = 1.0 / estimated_p
+        
+        # Sabır tipi sınıflandırma
+        if estimated_p < 0.25:
+            patience_type = "patient"      # Seçici, sabırlı
+        elif estimated_p > 0.45:
+            patience_type = "impatient"    # Kolay beğenen, sabırsız
+        else:
+            patience_type = "normal"
+        
+        return estimated_p, expected_Tu, patience_type
+    
+    def _compute_utility(self, track, estimated_p, patience_type):
+        """
+        Part 2 odaklı utility hesabı.
+        
+        Utility formülü:
+            U(track) = P(5★|track)^γ
+        
+        γ (gamma) sabır tipine göre ayarlanır:
+        - Sabırlı kullanıcı (γ < 1): Düşük P(5★) şarkılar da şans alır (exploration)
+        - Sabırsız kullanıcı (γ > 1): Yüksek P(5★) şarkılar tercih edilir (exploitation)
+        """
+        # Global P(5★) - Part 1'den
+        p_five = compute_global_probability(track)
+        
+        # Gamma ayarı: sabır tipine göre
+        if patience_type == "patient":
+            # Sabırlı kullanıcı: exploration yapılabilir
+            # Düşük P şarkılar da şans alır
+            gamma = 0.5  # P^0.5 → düzleştirme, daha uniform
+        elif patience_type == "impatient":
+            # Sabırsız kullanıcı: hızlı hit lazım
+            # Yüksek P şarkılar öne çıkar
+            gamma = 2.0  # P^2 → keskinleştirme, top şarkılar öne
+        else:
+            # Normal kullanıcı
+            gamma = 1.0  # P olduğu gibi
+        
+        utility = p_five ** gamma
+        
+        return utility, p_five
+    
     def query(self, song_ratings, topk=5):
-        liked = [s for s in song_ratings if s["rating"] == 5]
-
-        # kaba "sabır" tahmini (Part 2 ile bağlantı)
-        patience = 1 + len(song_ratings) - (len(liked) if liked else 1)
-        patience = max(1, min(10, patience))
-
-        df = self.tracks.copy()
-        df["prob"] = df.apply(compute_global_probability, axis=1)
-        df["utility"] = df["prob"].apply(lambda p: p ** (1.0 / patience))
-
-        w = df["utility"].values
-        w = w / w.sum()
-
-        # bir miktar örnekle, sonra en yüksek utility olanları al
-        sample_size = min(50, len(df))
-        sampled_idx = np.random.choice(len(df), size=sample_size, replace=False, p=w)
-        sampled = df.iloc[sampled_idx]
-
-        recs = sampled.sort_values("utility", ascending=False).head(topk)
+        """
+        Utility-Based Sampling: Part 2 entegreli öneri.
+        
+        Algoritma:
+        1. Kullanıcının sabır tipini tahmin et (Beta-Geometric posterior)
+        2. Her şarkı için utility hesapla (sabır tipine göre γ ayarlı)
+        3. Utility'ye orantılı olasılıkla sample et
+        4. Sabırlı kullanıcılara daha çeşitli, sabırsız kullanıcılara daha güvenli öner
+        """
+        # 1. Sabır tipi tahmini (Part 2)
+        estimated_p, expected_Tu, patience_type = self._estimate_user_patience_type(song_ratings)
+        
+        # 2. Zaten dinlenmiş şarkıları çıkar
+        rated_ids = set(s["track_id"] for s in song_ratings)
+        df = self.tracks[~self.tracks["track_id"].isin(rated_ids)].copy()
+        
+        if len(df) == 0:
+            df = self.tracks.copy()
+        
+        # 3. Her şarkı için utility hesapla
+        utilities = []
+        p_fives = []
+        
+        for _, track in df.iterrows():
+            util, p5 = self._compute_utility(track, estimated_p, patience_type)
+            utilities.append(util)
+            p_fives.append(p5)
+        
+        df["utility"] = utilities
+        df["p_five"] = p_fives
+        
+        # 4. Sampling stratejisi: sabır tipine göre
+        if patience_type == "patient":
+            # Sabırlı kullanıcı: Utility-proportional sampling (exploration)
+            # Daha çeşitli öneriler, düşük P şarkılar da şans alır
+            weights = df["utility"].values
+            weights = weights / weights.sum()
+            
+            sample_size = min(topk * 4, len(df))
+            sampled_idx = np.random.choice(
+                len(df), 
+                size=sample_size, 
+                replace=False, 
+                p=weights
+            )
+            sampled = df.iloc[sampled_idx]
+            # Sample içinden en yüksek utility olanları seç
+            recs = sampled.nlargest(topk, "utility")
+            
+        elif patience_type == "impatient":
+            # Sabırsız kullanıcı: Top utility (exploitation)
+            # En yüksek P(5★) şarkıları doğrudan öner
+            recs = df.nlargest(topk, "utility")
+            
+        else:
+            # Normal kullanıcı: Hibrit yaklaşım
+            # %60 exploitation + %40 exploration
+            n_exploit = max(1, int(topk * 0.6))
+            n_explore = topk - n_exploit
+            
+            # Top şarkılar
+            top_recs = df.nlargest(n_exploit, "utility")
+            
+            # Exploration: kalan şarkılardan utility-weighted sampling
+            remaining = df[~df["track_id"].isin(top_recs["track_id"])]
+            if len(remaining) > 0 and n_explore > 0:
+                weights = remaining["utility"].values
+                weights = weights / weights.sum()
+                explore_idx = np.random.choice(
+                    len(remaining),
+                    size=min(n_explore, len(remaining)),
+                    replace=False,
+                    p=weights
+                )
+                explore_recs = remaining.iloc[explore_idx]
+                recs = pd.concat([top_recs, explore_recs])
+            else:
+                recs = top_recs.head(topk)
+        
         return list(zip(recs["track_id"], recs["track_name"]))
 
 
