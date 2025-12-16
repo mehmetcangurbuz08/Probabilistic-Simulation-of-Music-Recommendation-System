@@ -155,46 +155,68 @@ def find_top_interactions(df, candidate_pairs,
     return results[:top_k]
 
 
+from itertools import combinations
+
 def run_task2(df):
+    print("\n===== TASK 2: OTOMATİK ETKİLEŞİM KEŞFİ (TÜM İKİLİLER) =====\n")
 
-    print("\n===== TASK 2: Top Interaction Effects =====\n")
+    # 1. ANALİZE SOKULACAK SÜTUNLARI SEÇ (Filtreleme)
+    # Her sütunu birbirine çarparsak bilgisayar kilitlenir veya saçmalar.
+    # O yüzden sadece "Kategorik" ve "Mantıklı" olanları seçiyoruz.
 
-    mood_cols = [c for c in df.columns if c.startswith("ab_mood_")]
-    genre_cols = [c for c in df.columns if c.startswith("ab_genre_")]
+    valid_cols = []
 
-    candidate_pairs = []
+    # YASAKLI LİSTESİ:
+    # 1. Hedef Değişkenler (Bunları feature olarak alırsan hile olur!)
+    # 2. ID ve İsimler (Bunların analizi olmaz)
+    blacklist = ["is_5_star", "rating", "track_id", "user_id",
+                 "track_name", "artist_name", "album_name",
+                 "uri", "url", "mbid", "score", "index"]
 
-    # Meaningful interaction families
-    if "year_bin" in df.columns:
-        for g in genre_cols:
-            candidate_pairs.append(("year_bin", g))
+    for col in df.columns:
+        # Yasaklı kelime içeriyor mu?
+        if any(b in col for b in blacklist):
+            continue
 
-    if "popularity_bin" in df.columns:
-        for m in mood_cols:
-            candidate_pairs.append(("popularity_bin", m))
+        # Sadece KATEGORİK verileri al (Sayısal gürültüyü engelle)
+        # Kural: Bir sütunun 50'den az çeşidi varsa (Mood, Genre, Key vb.) alalım.
+        # 50'den çoksa (Örn: 0.543, 0.112 gibi float değerler) almayalım.
+        if df[col].nunique() < 50:
+            valid_cols.append(col)
 
-    if "duration_bin" in df.columns:
-        for m in mood_cols:
-            candidate_pairs.append(("duration_bin", m))
+    print(f"Analiz edilecek özellikler ({len(valid_cols)} adet):")
+    print(valid_cols)
+    print("-" * 40)
 
-    if "explicit" in df.columns:
-        for m in mood_cols:
-            candidate_pairs.append(("explicit", m))
+    # 2. TÜM KOMBİNASYONLARI OLUŞTUR
+    # Matematikteki C(n, 2) işlemi.
+    # Örn: [A, B, C] -> (A,B), (A,C), (B,C)
+    all_pairs = list(combinations(valid_cols, 2))
 
-    top_results = find_top_interactions(df, candidate_pairs,
-                                        top_k=5,
-                                        min_count=25,
-                                        alpha=1)
+    print(f"Toplam {len(all_pairs)} farklı ikili kombinasyon taranıyor...")
 
-    for inter in top_results:
-        print("-" * 60)
-        print(f"Interaction: {inter['f1']} × {inter['f2']}")
-        print(f"Score = {inter['score']:.4f}")
-        print("Top categories:")
-        print(inter["table"][["prob", "total_count"]].head(5))
+    # 3. HEPSİNİ HESAPLA (Mevcut fonksiyonu kullanıyoruz)
+    # min_count=30 yaptık ki sadece tesadüf olan 3-5 şarkılık grupları bulmasın.
+    top_results = find_top_interactions(
+        df,
+        candidate_pairs=all_pairs,
+        top_k=10,       # En iyi 10 sonucu getir
+        min_count=30,   # En az 30 şarkı olsun
+        alpha=1
+    )
+
+    # 4. SONUÇLARI YAZDIR
+    print("\n>>> BULUNAN EN GÜÇLÜ ETKİLEŞİMLER:\n")
+    for i, inter in enumerate(top_results):
+        print("=" * 60)
+        print(f"#{i+1}: {inter['f1']}  [x]  {inter['f2']}")
+        print(f"Etki Gücü (Score): {inter['score']:.4f}")
+        print("Detaylar (En Yüksek Olasılıklı Gruplar):")
+
+        # Tabloyu biraz sadeleştirelim
+        view = inter["table"][["prob", "total_count", "success_count"]].head(3)
+        print(view)
         print()
-
-
 # ============================================================
 # 6. TASK 3 — BAYESIAN ANALYSIS
 # ============================================================
