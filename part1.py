@@ -222,10 +222,41 @@ def run_task2(df):
 # ============================================================
 
 def run_task3(df):
-    print("\n===== TASK 3: Bayesian Interpretation P(Artist | 5★) =====\n")
+    print("\n===== TASK 3: Bayesian Interpretation (Posterior Probabilities) =====\n")
+
+    # Sadece 5 yıldız alanları (Başarılıları) çekiyoruz
     subset = df[df["is_5_star"] == 1]
-    dist = subset["primary_artist_name"].value_counts(normalize=True)
-    print(dist.head(10))
+
+    # ---------------------------------------------------------
+    # 1. P(Artist | 5★) - Zaten vardı
+    # ---------------------------------------------------------
+    print(">>> ANALİZ A: P(Artist | 5★)")
+    print("5 Yıldız verdiğin bir şarkının hangi sanatçıdan olma ihtimali yüksek?")
+    dist_artist = subset["primary_artist_name"].value_counts(normalize=True)
+    print(dist_artist.head(10))
+    print("-" * 40)
+
+    # ---------------------------------------------------------
+    # 2. P(Genre_Dortmund | 5★) - Yeni Eklenen
+    # ---------------------------------------------------------
+    col_name = "ab_genre_dortmund_value"
+
+    if col_name in df.columns:
+        print(f"\n>>> ANALİZ B: P({col_name} | 5★)")
+        print("5 Yıldız verdiğin bir şarkının hangi Dortmund Türünden olma ihtimali yüksek?")
+
+        # normalize=True diyerek sayıyı değil, yüzdeyi (olasılığı) alıyoruz
+        dist_genre = subset[col_name].value_counts(normalize=True)
+
+        # Sonuçları yazdır
+        print(dist_genre)
+
+        # Görsel olarak yorumlamak için:
+        top_genre = dist_genre.index[0]
+        top_prob = dist_genre.iloc[0]
+        print(f"\n[YORUM]: 5 yıldız verdiğin şarkıların %{top_prob*100:.1f}'i '{top_genre}' türünde.")
+    else:
+        print(f"UYARI: {col_name} sütunu verisetinde bulunamadı!")
 
 
 # ============================================================
