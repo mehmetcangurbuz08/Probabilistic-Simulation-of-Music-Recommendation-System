@@ -234,10 +234,139 @@ def compute_global_probability(track: pd.Series) -> float:
 
 # ================================================================
 # 5. MODEL 1 — Conditional Filtering (Deterministic)
+#    + Kişiselleştirilmiş Dinamik Bonus Sistemi
 # ================================================================
+
+# Analiz edilecek feature'lar (bonus için aday olanlar)
+PERSONALIZABLE_FEATURES = [
+    "primary_artist_name",
+    "ab_genre_rosamerica_value",
+    "ab_genre_dortmund_value",
+    "ab_mood_happy_value",
+    "ab_mood_sad_value",
+    "ab_mood_party_value",
+    "ab_mood_relaxed_value",
+    "ab_danceability_value",
+    "ab_timbre_value",
+    "ab_voice_value",
+    "ab_gender_value",
+    "year_bin",
+    "popularity_bin",
+    "duration_bin",
+]
+
+# Dinamik bonus değerleri (sıralamaya göre)
+DYNAMIC_BONUS_VALUES = {
+    1: 1.5,   # En önemli feature: %50 bonus
+    2: 1.3,   # 2. önemli: %30 bonus
+    3: 1.15,  # 3. önemli: %15 bonus
+}
+
+
 class Model1:
     def __init__(self):
         self.tracks = TRACK_DF
+
+    def _calculate_feature_importance(self, liked_tracks):
+        """
+        Kullanıcının beğendiği şarkılar üzerinde her feature'ın
+        ne kadar "konsantre" olduğunu hesaplar.
+        
+        Yöntem: Concentration Score
+        - Eğer kullanıcı hep aynı genre'yi beğenmişse → genre önemli
+        - Eğer her türden beğenmişse → genre önemsiz
+        
+        Formül: max_ratio = en_sık_değerin_oranı
+        Yüksek oran = Yüksek önem (kullanıcı tutarlı tercih yapıyor)
+        """
+        importance_scores = {}
+        
+        for feat in PERSONALIZABLE_FEATURES:
+            if feat not in liked_tracks.columns:
+                continue
+            
+            # Bu feature'ın değer dağılımı
+            value_counts = liked_tracks[feat].value_counts(normalize=True)
+            
+            if len(value_counts) == 0:
+                continue
+            
+            # Concentration score: En sık değerin oranı
+            # Örn: rock %80 ise → 0.80 (yüksek önem)
+            # Örn: en yüksek genre %25 ise → 0.25 (düşük önem)
+            max_ratio = value_counts.iloc[0]
+            
+            # Bonus: Eğer az sayıda unique değer varsa, daha tutarlı demektir
+            # Entropy benzeri bir düzeltme
+            n_unique = len(value_counts)
+            n_total = len(liked_tracks)
+            
+            # Concentration score'u biraz boost et eğer az çeşitlilik varsa
+            if n_unique <= 2 and n_total >= 3:
+                max_ratio *= 1.2  # Az çeşitlilik bonusu
+            
+            importance_scores[feat] = {
+                "score": min(max_ratio, 1.0),  # Cap at 1.0
+                "top_value": value_counts.index[0],
+                "top_ratio": value_counts.iloc[0],
+                "n_unique": n_unique,
+            }
+        
+        # Score'a göre sırala (yüksekten düşüğe)
+        sorted_features = sorted(
+            importance_scores.items(),
+            key=lambda x: x[1]["score"],
+            reverse=True
+        )
+        
+        return sorted_features
+
+    def _get_dynamic_bonuses(self, liked_tracks):
+        """
+        Kişiselleştirilmiş bonus sistemi.
+        
+        Returns:
+            Dict[feature_name] → {
+                "bonus": float,      # Çarpan (1.5, 1.3, vb.)
+                "values": set,       # Bu feature'da beğenilen değerler
+                "rank": int,         # Önem sırası
+            }
+        """
+        if len(liked_tracks) < 2:
+            # Çok az veri varsa default bonus kullan
+            return {
+                "primary_artist_name": {"bonus": 1.5, "values": set(liked_tracks["primary_artist_name"]), "rank": 1},
+                "ab_genre_rosamerica_value": {"bonus": 1.3, "values": set(liked_tracks["ab_genre_rosamerica_value"]), "rank": 2},
+            }
+        
+        # Feature importance hesapla
+        sorted_features = self._calculate_feature_importance(liked_tracks)
+        
+        bonuses = {}
+        rank = 1
+        
+        for feat, info in sorted_features:
+            # Sadece yeterince "konsantre" olan feature'lara bonus ver
+            # Threshold: en az %40 konsantrasyon
+            if info["score"] < 0.35:
+                continue
+            
+            if rank > len(DYNAMIC_BONUS_VALUES):
+                break
+            
+            # Bu feature'da beğenilen değerleri al
+            liked_values = set(liked_tracks[feat].dropna().unique())
+            
+            bonuses[feat] = {
+                "bonus": DYNAMIC_BONUS_VALUES[rank],
+                "values": liked_values,
+                "rank": rank,
+                "concentration": info["score"],
+            }
+            
+            rank += 1
+        
+        return bonuses
 
     def query(self, song_ratings, topk=5):
         # kullanıcının beğendikleri (>=4)
@@ -251,28 +380,58 @@ class Model1:
             out = df.sort_values("prob", ascending=False).head(topk)
             return list(zip(out["track_id"], out["track_name"]))
 
-        liked_genres = liked_tracks["ab_genre_rosamerica_value"].value_counts()
-        liked_artists = liked_tracks["primary_artist_name"].value_counts()
+        # ========================================
+        # YENİ: Dinamik bonus hesapla
+        # ========================================
+        dynamic_bonuses = self._get_dynamic_bonuses(liked_tracks)
 
         df = self.tracks.copy()
         df["score"] = 0.0
 
         for i, tr in df.iterrows():
+            # Global probability (tüm feature'lardan)
             score = compute_global_probability(tr)
 
-            if tr["primary_artist_name"] in liked_artists.index:
-                score *= 1.5
-            if tr["ab_genre_rosamerica_value"] in liked_genres.index:
-                score *= 1.3
+            # ========================================
+            # YENİ: Dinamik bonusları uygula
+            # ========================================
+            for feat, bonus_info in dynamic_bonuses.items():
+                track_value = tr.get(feat)
+                if track_value in bonus_info["values"]:
+                    score *= bonus_info["bonus"]
 
             df.at[i, "score"] = score
 
         recs = df.sort_values("score", ascending=False).head(topk)
         return list(zip(recs["track_id"], recs["track_name"]))
+    
+    def explain_bonuses(self, song_ratings):
+        """
+        Debug/açıklama için: Hangi feature'lara ne kadar bonus verildiğini gösterir.
+        """
+        liked_ids = [s["track_id"] for s in song_ratings if s["rating"] >= 4]
+        liked_tracks = self.tracks[self.tracks["track_id"].isin(liked_ids)]
+        
+        if liked_tracks.empty:
+            return "No liked tracks to analyze."
+        
+        bonuses = self._get_dynamic_bonuses(liked_tracks)
+        
+        explanation = "=== Kişiselleştirilmiş Bonus Analizi ===\n"
+        explanation += f"Beğenilen şarkı sayısı: {len(liked_tracks)}\n\n"
+        
+        for feat, info in sorted(bonuses.items(), key=lambda x: x[1]["rank"]):
+            explanation += f"#{info['rank']} {feat}\n"
+            explanation += f"   Bonus: x{info['bonus']}\n"
+            explanation += f"   Konsantrasyon: {info['concentration']:.1%}\n"
+            explanation += f"   Beğenilen değerler: {list(info['values'])[:5]}...\n\n"
+        
+        return explanation
 
 
 # ================================================================
 # 6. MODEL 2 — Advanced Combined Model (Global + Personal + Patience)
+#    + Kişiselleştirilmiş Dinamik Bonus Sistemi
 # ================================================================
 class Model2:
     """
@@ -282,11 +441,11 @@ class Model2:
 
     Bileşenler:
     1. GLOBAL: Part 1'den feature-based P(5★) hesaplaması
-    2. PERSONAL: Genre/artist bonusları (Model 1 gibi)
+    2. PERSONAL: Dinamik bonus sistemi (en önemli feature'lara göre)
     3. PATIENCE: Beta-Geometric sabır modeli ile exploration/exploitation dengesi
 
     Formül:
-    Score = Global_P(5★) × Genre_Bonus × Artist_Bonus × Patience_Factor
+    Score = Global_P(5★) × Dynamic_Bonuses × Patience_Factor
 
     Sabır Modeli (Part 2):
     - Tu = Kullanıcının 5★ şarkı bulması için beklenen öneri sayısı
@@ -297,6 +456,104 @@ class Model2:
 
     def __init__(self):
         self.tracks = TRACK_DF
+
+    def _calculate_feature_importance(self, liked_tracks):
+        """
+        Kullanıcının beğendiği şarkılar üzerinde her feature'ın
+        ne kadar "konsantre" olduğunu hesaplar.
+        
+        Yöntem: Concentration Score
+        - Eğer kullanıcı hep aynı genre'yi beğenmişse → genre önemli
+        - Eğer her türden beğenmişse → genre önemsiz
+        
+        Formül: max_ratio = en_sık_değerin_oranı
+        Yüksek oran = Yüksek önem (kullanıcı tutarlı tercih yapıyor)
+        """
+        importance_scores = {}
+        
+        for feat in PERSONALIZABLE_FEATURES:
+            if feat not in liked_tracks.columns:
+                continue
+            
+            # Bu feature'ın değer dağılımı
+            value_counts = liked_tracks[feat].value_counts(normalize=True)
+            
+            if len(value_counts) == 0:
+                continue
+            
+            # Concentration score: En sık değerin oranı
+            max_ratio = value_counts.iloc[0]
+            
+            # Bonus: Eğer az sayıda unique değer varsa, daha tutarlı demektir
+            n_unique = len(value_counts)
+            n_total = len(liked_tracks)
+            
+            # Concentration score'u biraz boost et eğer az çeşitlilik varsa
+            if n_unique <= 2 and n_total >= 3:
+                max_ratio *= 1.2  # Az çeşitlilik bonusu
+            
+            importance_scores[feat] = {
+                "score": min(max_ratio, 1.0),
+                "top_value": value_counts.index[0],
+                "top_ratio": value_counts.iloc[0],
+                "n_unique": n_unique,
+            }
+        
+        # Score'a göre sırala (yüksekten düşüğe)
+        sorted_features = sorted(
+            importance_scores.items(),
+            key=lambda x: x[1]["score"],
+            reverse=True
+        )
+        
+        return sorted_features
+
+    def _get_dynamic_bonuses(self, liked_tracks):
+        """
+        Kişiselleştirilmiş bonus sistemi.
+        
+        Returns:
+            Dict[feature_name] → {
+                "bonus": float,      # Çarpan (1.5, 1.3, vb.)
+                "values": set,       # Bu feature'da beğenilen değerler
+                "rank": int,         # Önem sırası
+            }
+        """
+        if len(liked_tracks) < 2:
+            # Çok az veri varsa default bonus kullan
+            return {
+                "primary_artist_name": {"bonus": 1.5, "values": set(liked_tracks["primary_artist_name"]), "rank": 1},
+                "ab_genre_rosamerica_value": {"bonus": 1.3, "values": set(liked_tracks["ab_genre_rosamerica_value"]), "rank": 2},
+            }
+        
+        # Feature importance hesapla
+        sorted_features = self._calculate_feature_importance(liked_tracks)
+        
+        bonuses = {}
+        rank = 1
+        
+        for feat, info in sorted_features:
+            # Sadece yeterince "konsantre" olan feature'lara bonus ver
+            # Threshold: en az %35 konsantrasyon
+            if info["score"] < 0.35:
+                continue
+            
+            if rank > len(DYNAMIC_BONUS_VALUES):
+                break
+            
+            # Bu feature'da beğenilen değerleri al
+            liked_values = set(liked_tracks[feat].dropna().unique())
+            
+            bonuses[feat] = {
+                "bonus": DYNAMIC_BONUS_VALUES[rank],
+                "values": liked_values,
+                "rank": rank,
+                "concentration": info["score"],
+            }
+            
+            rank += 1
+        
+        return bonuses
 
     def _estimate_user_patience(self, song_ratings):
         """
@@ -344,23 +601,17 @@ class Model2:
         """
         if expected_Tu < 2.5:
             # Sabırsız kullanıcı - exploration reward
-            # Bu kullanıcı zaten çok şeyi beğeniyor, çeşitlilik kazandır
-            # Orta skorlu şarkılara şans ver
             if base_score > 0.6:
-                # Çok yüksek skorlar: hafif penalty (çeşitlilik için)
                 factor = 0.9 + 0.1 * (1 - base_score)
             else:
-                # Orta skorlar: exploration bonus
                 factor = 1.0 + 0.15 * (1 - base_score)
 
         elif expected_Tu > 4.0:
             # Sabırlı kullanıcı - exploitation reward
-            # Bu kullanıcı seçici, güvenli/yüksek skorlu şarkılar öner
-            # Yüksek skorlara büyük bonus
             if base_score > 0.5:
-                factor = 1.0 + 0.3 * base_score  # Yüksek skora büyük bonus
+                factor = 1.0 + 0.3 * base_score
             else:
-                factor = 0.8 * base_score  # Düşük skora penalty
+                factor = 0.8 * base_score
         else:
             # Normal kullanıcı - dengeli
             factor = 1.0
@@ -369,30 +620,31 @@ class Model2:
 
     def query(self, song_ratings, topk=5):
         """
-        Global + Personal + Patience birleşik öneri.
+        Global + Personal (Dinamik) + Patience birleşik öneri.
 
         Model 1'in yaptığı her şeyi yapıp üzerine sabır modelini ekler.
         """
         # ========================================
-        # STEP 1: Kişisel Tercih Analizi (Model 1 gibi)
+        # STEP 1: Beğenilen Şarkıları Bul
         # ========================================
-        liked_genres = set()
-        liked_artists = set()
-
-        for s in song_ratings:
-            if s["rating"] >= 4:
-                row = self.tracks[self.tracks["track_id"] == s["track_id"]]
-                if len(row) > 0:
-                    liked_genres.add(row.iloc[0]["ab_genre_rosamerica_value"])
-                    liked_artists.add(row.iloc[0]["primary_artist_name"])
+        liked_ids = [s["track_id"] for s in song_ratings if s["rating"] >= 4]
+        liked_tracks = self.tracks[self.tracks["track_id"].isin(liked_ids)]
 
         # ========================================
-        # STEP 2: Sabır Tahmini (Part 2)
+        # STEP 2: Dinamik Bonus Hesapla (YENİ!)
+        # ========================================
+        if not liked_tracks.empty:
+            dynamic_bonuses = self._get_dynamic_bonuses(liked_tracks)
+        else:
+            dynamic_bonuses = {}
+
+        # ========================================
+        # STEP 3: Sabır Tahmini (Part 2)
         # ========================================
         estimated_p, expected_Tu = self._estimate_user_patience(song_ratings)
 
         # ========================================
-        # STEP 3: Aday Şarkıları Filtrele
+        # STEP 4: Aday Şarkıları Filtrele
         # ========================================
         rated_ids = set(s["track_id"] for s in song_ratings)
         df = self.tracks[~self.tracks["track_id"].isin(rated_ids)].copy()
@@ -401,7 +653,7 @@ class Model2:
             df = self.tracks.copy()
 
         # ========================================
-        # STEP 4: Her Şarkı için Combined Score Hesapla
+        # STEP 5: Her Şarkı için Combined Score Hesapla
         # ========================================
         scores = []
 
@@ -409,27 +661,20 @@ class Model2:
             # --- A. Global P(5★) - Part 1 ---
             global_p5 = compute_global_probability(track)
 
-            # --- B. Genre Bonus (Model 1 gibi) ---
-            genre = track.get("ab_genre_rosamerica_value", "")
-            if liked_genres and genre in liked_genres:
-                genre_bonus = 1.4  # Beğenilen genre: %40 bonus
-            else:
-                genre_bonus = 1.0
+            # --- B. Dinamik Bonusları Uygula (YENİ!) ---
+            personal_multiplier = 1.0
+            for feat, bonus_info in dynamic_bonuses.items():
+                track_value = track.get(feat)
+                if track_value in bonus_info["values"]:
+                    personal_multiplier *= bonus_info["bonus"]
 
-            # --- C. Artist Bonus (Model 1 gibi) ---
-            artist = track.get("primary_artist_name", "")
-            if liked_artists and artist in liked_artists:
-                artist_bonus = 1.6  # Beğenilen artist: %60 bonus
-            else:
-                artist_bonus = 1.0
+            # --- C. Base Score (Global × Personal) ---
+            base_score = global_p5 * personal_multiplier
 
-            # --- D. Base Score (Global × Personal) ---
-            base_score = global_p5 * genre_bonus * artist_bonus
-
-            # --- E. Patience Factor (Part 2) ---
+            # --- D. Patience Factor (Part 2) ---
             patience_factor = self._compute_patience_factor(base_score, estimated_p, expected_Tu)
 
-            # --- F. Final Combined Score ---
+            # --- E. Final Combined Score ---
             final_score = base_score * patience_factor
 
             scores.append(final_score)
@@ -437,7 +682,7 @@ class Model2:
         df["score"] = scores
 
         # ========================================
-        # STEP 5: Top-K Seçimi (Sabır tipine göre)
+        # STEP 6: Top-K Seçimi (Sabır tipine göre)
         # ========================================
         if expected_Tu > 4.0:
             # Sabırlı kullanıcı: Direkt en yüksek skorlar (exploit)
@@ -447,7 +692,7 @@ class Model2:
             # Sabırsız kullanıcı: Weighted sampling for diversity (explore)
             top_candidates = df.nlargest(min(25, len(df)), "score")
             weights = top_candidates["score"].values
-            weights = np.maximum(weights, 1e-10)  # Sıfır olmaması için
+            weights = np.maximum(weights, 1e-10)
             weights = weights / weights.sum()
 
             sample_size = min(topk, len(top_candidates))
@@ -487,6 +732,42 @@ class Model2:
                     recs = top_recs.head(topk)
             else:
                 recs = top_recs.head(topk)
+
+        return list(zip(recs["track_id"], recs["track_name"]))
+
+    def explain_bonuses(self, song_ratings):
+        """
+        Debug/açıklama için: Hangi feature'lara ne kadar bonus verildiğini gösterir.
+        """
+        liked_ids = [s["track_id"] for s in song_ratings if s["rating"] >= 4]
+        liked_tracks = self.tracks[self.tracks["track_id"].isin(liked_ids)]
+        
+        if liked_tracks.empty:
+            return "No liked tracks to analyze."
+        
+        bonuses = self._get_dynamic_bonuses(liked_tracks)
+        estimated_p, expected_Tu = self._estimate_user_patience(song_ratings)
+        
+        explanation = "=== Model 2: Kişiselleştirilmiş Bonus + Sabır Analizi ===\n"
+        explanation += f"Beğenilen şarkı sayısı: {len(liked_tracks)}\n"
+        explanation += f"Tahmini p (5★ olasılığı): {estimated_p:.3f}\n"
+        explanation += f"Beklenen Tu (sabır): {expected_Tu:.2f}\n"
+        
+        if expected_Tu < 2.5:
+            explanation += f"Kullanıcı Tipi: SABIRSIZ (exploration modu)\n\n"
+        elif expected_Tu > 4.0:
+            explanation += f"Kullanıcı Tipi: SABIRLI (exploitation modu)\n\n"
+        else:
+            explanation += f"Kullanıcı Tipi: NORMAL (dengeli mod)\n\n"
+        
+        explanation += "--- Dinamik Bonuslar ---\n"
+        for feat, info in sorted(bonuses.items(), key=lambda x: x[1]["rank"]):
+            explanation += f"#{info['rank']} {feat}\n"
+            explanation += f"   Bonus: x{info['bonus']}\n"
+            explanation += f"   Konsantrasyon: {info['concentration']:.1%}\n"
+            explanation += f"   Beğenilen değerler: {list(info['values'])[:5]}...\n\n"
+        
+        return explanation
 
         return list(zip(recs["track_id"], recs["track_name"]))
 

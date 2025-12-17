@@ -82,7 +82,7 @@ USER_PREF_FEATURES = CONTINUOUS_PREF_FEATURES
 RNG_SEED = 343
 np.random.seed(RNG_SEED)
 
-N_USERS = 2000        # Monte Carlo deneme sayısı
+N_USERS = 100        # Monte Carlo deneme sayısı
 TOPK = 5              # Hit@k için k
 WARMUP_SIZE = 20      # Her kullanıcı için warm-up şarkı sayısı (tercih öğrenme)
 TEST_SIZE = 10        # Model test için öneri sayısı
