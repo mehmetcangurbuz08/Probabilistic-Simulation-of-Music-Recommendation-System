@@ -60,34 +60,43 @@ def add_bins(df: pd.DataFrame) -> pd.DataFrame:
         df["year_bin"] = "unknown"
 
     # ---- popularity_bin (track_popularity 0–100) ----
-    def pop_to_bin(p):
-        try:
-            p = float(p)
-        except Exception:
-            return "low"
-        if p >= 75:
-            return "very_high"
-        elif p >= 50:
-            return "high"
-        elif p >= 25:
-            return "low"
-        else:
-            return "very_low"
-
+    # Part 1'de qcut ile 4 eşit parça oluşturuluyor
     if "track_popularity" in df.columns:
-        df["popularity_bin"] = df["track_popularity"].apply(pop_to_bin)
+        try:
+            df["popularity_bin"] = pd.qcut(
+                df["track_popularity"], q=4,
+                labels=["very_low", "low", "high", "very_high"],
+                duplicates="drop"
+            )
+        except:
+            # Fallback: sabit eşikler
+            def pop_to_bin(p):
+                try:
+                    p = float(p)
+                except Exception:
+                    return "low"
+                if p >= 75:
+                    return "very_high"
+                elif p >= 50:
+                    return "high"
+                elif p >= 25:
+                    return "low"
+                else:
+                    return "very_low"
+            df["popularity_bin"] = df["track_popularity"].apply(pop_to_bin)
     else:
         df["popularity_bin"] = "low"
 
     # ---- duration_bin (duration_ms) ----
+    # Part 1 ile uyumlu: 180s (3dk) ve 300s (5dk) eşikleri
     def dur_to_bin(ms):
         try:
             s = float(ms) / 1000.0
         except Exception:
             return "medium"
-        if s < 150:      # < 2.5 dakika
+        if s < 180:      # < 3 dakika
             return "short"
-        elif s < 270:    # 2.5–4.5 dakika
+        elif s < 300:    # 3–5 dakika
             return "medium"
         else:
             return "long"
@@ -98,15 +107,24 @@ def add_bins(df: pd.DataFrame) -> pd.DataFrame:
         df["duration_bin"] = "medium"
 
     # ---- markets_bin (available_markets_count) ----
+    # Part 1'de qcut ile 3 kategori oluşturuluyor: few, medium, many
     if "available_markets_count" in df.columns:
-        median_m = df["available_markets_count"].median()
-        def markets_bin_fun(m):
-            try:
-                m = float(m)
-            except Exception:
-                return "many"
-            return "few" if m < median_m else "many"
-        df["markets_bin"] = df["available_markets_count"].apply(markets_bin_fun)
+        try:
+            df["markets_bin"] = pd.qcut(
+                df["available_markets_count"], q=3,
+                labels=["few", "medium", "many"],
+                duplicates="drop"
+            )
+        except:
+            # Eğer qcut başarısız olursa median-based fallback
+            median_m = df["available_markets_count"].median()
+            def markets_bin_fun(m):
+                try:
+                    m = float(m)
+                except Exception:
+                    return "many"
+                return "few" if m < median_m else "many"
+            df["markets_bin"] = df["available_markets_count"].apply(markets_bin_fun)
     else:
         df["markets_bin"] = "many"
 
