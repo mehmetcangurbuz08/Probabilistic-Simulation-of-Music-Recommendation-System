@@ -6,6 +6,35 @@ import numpy as np
 # 1. DATA LOADING
 # ============================================================
 
+import os
+import re
+
+def _safe_name(s: str) -> str:
+    s = str(s)
+    s = re.sub(r"[^a-zA-Z0-9_\-]+", "_", s)
+    return s.strip("_")
+
+def stats_to_long(stats_df, feature_cols, pair_name=None):
+    """
+    stats_df: calculate_smoothed_prob çıktısı (index = feature_cols, columns: total_count, success_count, prob)
+    feature_cols: ['col'] veya ['col1','col2']
+    """
+    out = stats_df.reset_index().copy()
+    out.insert(0, "feature", pair_name if pair_name else "|".join(feature_cols))
+
+    # feature value kolonlarını v1, v2 diye normalize et
+    for i, c in enumerate(feature_cols, start=1):
+        out.rename(columns={c: f"v{i}"}, inplace=True)
+
+    # sabitle
+    keep = ["feature"] + [f"v{i}" for i in range(1, len(feature_cols)+1)] + ["prob", "total_count", "success_count"]
+    return out[keep]
+
+def ensure_dir(path):
+    os.makedirs(path, exist_ok=True)
+
+
+
 def load_data():
     print(">>> Loading CSV files...")
 
@@ -117,6 +146,107 @@ def calculate_smoothed_prob(df, features, target="is_5_star", alpha=1):
     stats["prob"] = (stats["success_count"] + alpha) / \
                     (stats["total_count"] + alpha * k)
     return stats.sort_values("prob", ascending=False)
+
+# ============================================================
+# 4.5 EXPORT HELPERS (CSV OUTPUT)
+# ============================================================
+
+def ensure_dir(path):
+    os.makedirs(path, exist_ok=True)
+
+def export_single_feature_probs(df, feature_list, out_csv, alpha=1):
+    """
+    Tekil feature'lar için P(5★ | feature=value) tablolarını tek CSV'ye long-format yazar.
+    CSV kolonları: feature, value, prob, total_count, success_count
+    """
+    rows = []
+    for feat in feature_list:
+        if feat not in df.columns:
+            continue
+        stats = calculate_smoothed_prob(df, [feat], alpha=alpha).reset_index()
+        stats.rename(columns={feat: "value"}, inplace=True)
+        stats.insert(0, "feature", feat)
+        rows.append(stats[["feature", "value", "prob", "total_count", "success_count"]])
+
+    out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
+        columns=["feature", "value", "prob", "total_count", "success_count"]
+    )
+    out.to_csv(out_csv, index=False)
+
+
+def export_top_interactions(df, out_csv, top_k=10, min_count=30, alpha=1):
+    """
+    run_task2 içindeki mantığı kullanır ama print yerine CSV üretir.
+    CSV kolonları: f1, f2, v1, v2, prob, total_count, success_count, score
+    """
+    from itertools import combinations
+
+    blacklist = ["is_5_star", "rating", "track_id", "user_id",
+                 "track_name", "artist_name", "album_name",
+                 "uri", "url", "mbid", "score", "index"]
+
+    valid_cols = []
+    for col in df.columns:
+        if any(b in col for b in blacklist):
+            continue
+        if df[col].nunique() < 50:
+            valid_cols.append(col)
+
+    all_pairs = list(combinations(valid_cols, 2))
+
+    top_results = find_top_interactions(
+        df,
+        candidate_pairs=all_pairs,
+        top_k=top_k,
+        min_count=min_count,
+        alpha=alpha
+    )
+
+    rows = []
+    for inter in top_results:
+        f1, f2, score = inter["f1"], inter["f2"], inter["score"]
+        table = inter["table"].reset_index()  # index: (f1, f2)
+
+        # tablo kolon isimleri f1,f2 olacak; v1,v2'ye çeviriyoruz
+        table.rename(columns={f1: "v1", f2: "v2"}, inplace=True)
+        table.insert(0, "f1", f1)
+        table.insert(1, "f2", f2)
+        table["score"] = score
+
+        rows.append(table[["f1", "f2", "v1", "v2", "prob", "total_count", "success_count", "score"]])
+
+    out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
+        columns=["f1", "f2", "v1", "v2", "prob", "total_count", "success_count", "score"]
+    )
+    out.to_csv(out_csv, index=False)
+
+
+def export_posteriors_task3(df, out_csv):
+    """
+    Task3'te bastığın posteriorları CSV'ye yazar.
+    CSV kolonları: feature, value, posterior
+    """
+    subset = df[df["is_5_star"] == 1]
+    rows = []
+
+    if "primary_artist_name" in subset.columns:
+        dist = subset["primary_artist_name"].value_counts(normalize=True).reset_index()
+        dist.columns = ["value", "posterior"]
+        dist.insert(0, "feature", "P(artist | 5star)")
+        rows.append(dist)
+
+    col_name = "ab_genre_dortmund_value"
+    if col_name in subset.columns:
+        dist = subset[col_name].value_counts(normalize=True).reset_index()
+        dist.columns = ["value", "posterior"]
+        dist.insert(0, "feature", f"P({col_name} | 5star)")
+        rows.append(dist)
+
+    out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
+        columns=["feature", "value", "posterior"]
+    )
+    out.to_csv(out_csv, index=False)
+
 
 
 # ============================================================
@@ -331,22 +461,52 @@ def main():
         else:
             print(stats[["prob", "total_count"]])
 
-    # ------------------------------
-    # TASK 2
-    # ------------------------------
-    run_task2(df_global)
+    ensure_dir("artifacts")
 
-    # ------------------------------
-    # TASK 3
-    # ------------------------------
-    run_task3(df_global)
+    features = [
+        "primary_artist_name",
+        "explicit",
+        "year_bin",
+        "popularity_bin",
+        "duration_bin",
+        "markets_bin",
+    ]
+    audio = [c for c in df_global.columns if c.startswith("ab_") and "mbid" not in c]
+    features.extend(audio)
 
-    # ------------------------------
-    # TASK 4
-    # ------------------------------
-    run_task4(df_global, df_personal)
+    # Global tekil conditional'lar
+    export_single_feature_probs(
+        df_global,
+        features,
+        out_csv="artifacts/cond_probs_global.csv",
+        alpha=1
+    )
 
-    print("\nAnalysis Complete.")
+    # Personal tekil conditional'lar (istersen)
+    export_single_feature_probs(
+        df_personal,
+        features,
+        out_csv="artifacts/cond_probs_personal.csv",
+        alpha=1
+    )
+
+    # Top interactions
+    export_top_interactions(
+        df_global,
+        out_csv="artifacts/interactions_top.csv",
+        top_k=10,
+        min_count=30,
+        alpha=1
+    )
+
+    # Bayes / posterior export
+    export_posteriors_task3(
+        df_global,
+        out_csv="artifacts/posteriors.csv"
+    )
+
+    # İstersen sadece minik bir bilgi bas:
+    print("Wrote CSV artifacts to ./artifacts/")
 
 
 if __name__ == "__main__":

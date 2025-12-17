@@ -9,6 +9,45 @@ import numpy as np
 import pandas as pd
 import random
 
+import os
+
+ART_DIR = "artifacts"  # repo’da bu klasörü koyacaksın
+
+def load_cond_probs(path):
+    df = pd.read_csv(path)
+    # key: (feature, value_str) -> prob
+    prob_map = {}
+    for _, r in df.iterrows():
+        feat = str(r["feature"])
+        val = str(r["value"])
+        prob_map[(feat, val)] = float(r["prob"])
+    return prob_map
+
+# Global probs
+P_GLOBAL = load_cond_probs(os.path.join(ART_DIR, "cond_probs_global.csv"))
+
+# Personal probs (opsiyonel)
+P_PERSONAL = None
+personal_path = os.path.join(ART_DIR, "cond_probs_personal.csv")
+if os.path.exists(personal_path):
+    P_PERSONAL = load_cond_probs(personal_path)
+
+def get_prob(feature, value, default=0.2):
+    """Global fallback ile P(5★ | feature=value)"""
+    return P_GLOBAL.get((str(feature), str(value)), default)
+
+def get_blended_prob(feature, value, w_personal=0.35, default=0.2):
+    """
+    Personal varsa: P = w*Ppersonal + (1-w)*Pglobal
+    (w'yu istersen rating sayısına göre dinamik yaparsın)
+    """
+    pg = get_prob(feature, value, default=default)
+    if P_PERSONAL is None:
+        return pg
+    pp = P_PERSONAL.get((str(feature), str(value)), pg)
+    return w_personal * pp + (1 - w_personal) * pg
+
+
 # ================================================================
 # 1. TRACKS VERİSİNİ YÜKLE + BİNLERİ OLUŞTUR
 # ================================================================
@@ -134,98 +173,6 @@ def add_bins(df: pd.DataFrame) -> pd.DataFrame:
 TRACK_DF = add_bins(TRACK_DF)
 
 # ================================================================
-# 2. PART 1'DEN OLASILIKLAR (GÜNCEL)
-# ================================================================
-
-P_explicit = {
-    False: 0.241606,
-    True: 0.214669
-}
-
-P_year_bin = {
-    "1990s": 0.345238,
-    "pre_1980": 0.315217,
-    "1980s": 0.265823,
-    "2000s": 0.262238,
-    "2010s": 0.216856,
-    "2020s": 0.211765,
-}
-
-P_popularity_bin = {
-    "very_high": 0.313776,
-    "high": 0.255474,
-    "low": 0.191358,
-    "very_low": 0.191321,
-}
-
-P_duration_bin = {
-    "long": 0.379845,
-    "medium": 0.232262,
-    "short": 0.181818,
-}
-
-P_markets_bin = {
-    "medium": 0.264610,
-    "few": 0.230137,
-    "many": 0.206186,
-}
-
-P_feature = {
-    # Danceability
-    "not_danceable": 0.304505,
-    "danceable": 0.205240,
-    # Acousticness
-    "not_acoustic": 0.233881,
-    "acoustic": 0.233429,
-    # Aggressiveness
-    "not_aggressive": 0.236456,
-    "aggressive": 0.203822,
-    # Electronic
-    "electronic": 0.242984,
-    "not_electronic": 0.212174,
-    # Happy
-    "not_happy": 0.239706,
-    "happy": 0.219684,
-    # Party
-    "not_party": 0.252941,
-    "party": 0.202977,
-    # Relaxed
-    "relaxed": 0.244160,
-    "not_relaxed": 0.210963,
-    # Sadness
-    "not_sad": 0.238551,
-    "sad": 0.218884,
-    # Gender
-    "male": 0.258467,
-    "female": 0.223684,
-    # Voice/Instrumental
-    "instrumental": 0.273438,
-    "voice": 0.214119,
-    # Timbre
-    "dark": 0.261445,
-    "bright": 0.205074,
-}
-
-P_genre_dortmund = {
-    "jazz": 0.500000,
-    "blues": 0.400000,
-    "rock": 0.375000,
-    "alternative": 0.272727,
-    "electronic": 0.234979,
-    "folkcountry": 0.155556,
-}
-
-P_genre_ros = {
-    "roc": 0.307317,
-    "jaz": 0.272727,
-    "hip": 0.270833,
-    "cla": 0.240000,
-    "pop": 0.225115,
-    "dan": 0.225000,
-    "rhy": 0.204778,
-}
-
-# ================================================================
 # 3. PART 2 PARAMETRELERİ (BETA-GEOMETRIC)
 # ================================================================
 ALPHA = 4.3379 #3.0535
@@ -237,43 +184,52 @@ EXPECTED_P = ALPHA / (ALPHA + BETA)   # ≈ 0.3525
 # 4. Yardımcı: P(5★ | track features) Hesabı
 # ================================================================
 def compute_global_probability(track: pd.Series) -> float:
-    """
-    Part 1'deki feature bazlı P(5★) tahminlerini çarpıp
-    tek bir global skor üretir.
-    """
     score = 1.0
+
+    # ---- Part1’de export ettiğin feature isimleriyle aynı olmalı ----
+    # Eğer Part1 scriptinde explicit kolonunu "explicit" diye export ettiysen:
+    # burada feature adını "explicit" kullan.
+    # Ben recommender’daki explicit_bool’u kullanıyorum ama alt satırda fallback var.
 
     # explicit
     explicit_val = track.get("explicit_bool", False)
-    score *= P_explicit.get(explicit_val, 0.1)
+    # CSV’de feature adı "explicit" ise:
+    p_exp = get_prob("explicit", explicit_val, default=0.2)
+    # CSV’de feature adı "explicit_bool" ise:
+    p_exp2 = get_prob("explicit_bool", explicit_val, default=p_exp)
+    score *= p_exp2
 
-    # year_bin
-    yb = track.get("year_bin", "2000s")
-    score *= P_year_bin.get(yb, 0.2)
+    # year_bin, popularity_bin, duration_bin, markets_bin
+    score *= get_prob("year_bin", track.get("year_bin", "unknown"), default=0.2)
+    score *= get_prob("popularity_bin", track.get("popularity_bin", "low"), default=0.2)
+    score *= get_prob("duration_bin", track.get("duration_bin", "medium"), default=0.2)
+    score *= get_prob("markets_bin", track.get("markets_bin", "many"), default=0.2)
 
-    # popularity_bin
-    pb = track.get("popularity_bin", "low")
-    score *= P_popularity_bin.get(pb, 0.3)
+    # ---- ab_ feature’lar (genre/mood/timbre vs) ----
+    # Burada “çok fazla kolon” çarpmak skoru aşırı küçültebilir.
+    # O yüzden en etkili gördüklerini seç (senin eski dict’lerinden).
+    ab_cols = [
+        "ab_genre_rosamerica_value",
+        "ab_genre_dortmund_value",
+        "ab_timbre_value",
+        "ab_danceability_value",
+        "ab_acousticness_value",
+        "ab_aggressiveness_value",
+        "ab_electronic_value",
+        "ab_mood_happy_value",
+        "ab_mood_party_value",
+        "ab_mood_relaxed_value",
+        "ab_mood_sad_value",
+        "ab_gender_value",
+        "ab_voice_value",
+    ]
 
-    # duration_bin
-    db = track.get("duration_bin", "medium")
-    score *= P_duration_bin.get(db, 0.3)
-
-    # markets_bin
-    mb = track.get("markets_bin", "many")
-    score *= P_markets_bin.get(mb, 0.3)
-
-    # mood / genre kolonları
-    for col in track.index:
-        val = track[col]
-        if val in P_feature:
-            score *= P_feature[val]
-        if val in P_genre_dortmund:
-            score *= P_genre_dortmund[val]
-        if val in P_genre_ros:
-            score *= P_genre_ros[val]
+    for c in ab_cols:
+        if c in track.index:
+            score *= get_prob(c, track.get(c, "unknown"), default=0.2)
 
     return float(score)
+
 
 
 # ================================================================

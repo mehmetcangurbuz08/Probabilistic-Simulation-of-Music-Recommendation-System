@@ -1,0 +1,67 @@
+feature,value,prob,total_count,success_count
+primary_artist_name,Adele,0.6666666666666666,1,1
+primary_artist_name,Kendrick Lamar,0.6666666666666666,1,1
+primary_artist_name,Queen,0.6666666666666666,1,1
+primary_artist_name,$uicideboy$,0.3333333333333333,1,0
+primary_artist_name,Bad Bunny,0.3333333333333333,1,0
+primary_artist_name,5 Seconds of Summer,0.3333333333333333,1,0
+primary_artist_name,Kanye West,0.3333333333333333,1,0
+primary_artist_name,"Earth, Wind & Fire",0.3333333333333333,1,0
+primary_artist_name,Katy Perry,0.3333333333333333,1,0
+primary_artist_name,MEDUZA,0.3333333333333333,1,0
+primary_artist_name,Macklemore & Ryan Lewis,0.3333333333333333,1,0
+primary_artist_name,Imagine Dragons,0.3333333333333333,1,0
+primary_artist_name,Marshmello,0.3333333333333333,1,0
+primary_artist_name,P!nk,0.3333333333333333,1,0
+primary_artist_name,Paramore,0.3333333333333333,1,0
+primary_artist_name,Post Malone,0.3333333333333333,1,0
+primary_artist_name,Rixton,0.3333333333333333,1,0
+primary_artist_name,Soulja Boy,0.3333333333333333,1,0
+primary_artist_name,The Calling,0.3333333333333333,1,0
+primary_artist_name,XXXTENTACION,0.3333333333333333,1,0
+explicit,True,0.2222222222222222,7,1
+explicit,False,0.2,13,2
+year_bin,1980s,0.5,0,0
+year_bin,1990s,0.5,0,0
+year_bin,pre_1980,0.3333333333333333,1,0
+year_bin,2010s,0.26666666666666666,13,3
+year_bin,2020s,0.25,2,0
+year_bin,2000s,0.16666666666666666,4,0
+popularity_bin,very_high,0.3333333333333333,4,1
+popularity_bin,very_low,0.2857142857142857,5,1
+popularity_bin,high,0.25,6,1
+popularity_bin,low,0.14285714285714285,5,0
+duration_bin,long,0.5,0,0
+duration_bin,short,0.2857142857142857,5,1
+duration_bin,medium,0.17647058823529413,15,2
+markets_bin,medium,0.25,6,1
+markets_bin,few,0.2222222222222222,7,1
+markets_bin,many,0.125,6,0
+ab_danceability_value,not_danceable,0.3333333333333333,4,1
+ab_danceability_value,danceable,0.16666666666666666,16,2
+ab_mood_acoustic_value,acoustic,0.4,3,1
+ab_mood_acoustic_value,not_acoustic,0.15789473684210525,17,2
+ab_mood_aggressive_value,aggressive,0.3333333333333333,1,0
+ab_mood_aggressive_value,not_aggressive,0.19047619047619047,19,3
+ab_mood_electronic_value,electronic,0.21428571428571427,12,2
+ab_mood_electronic_value,not_electronic,0.2,8,1
+ab_mood_happy_value,happy,0.3333333333333333,4,1
+ab_mood_happy_value,not_happy,0.16666666666666666,16,2
+ab_mood_party_value,party,0.2727272727272727,9,2
+ab_mood_party_value,not_party,0.15384615384615385,11,1
+ab_mood_relaxed_value,not_relaxed,0.2222222222222222,7,1
+ab_mood_relaxed_value,relaxed,0.2,13,2
+ab_mood_sad_value,sad,0.375,6,2
+ab_mood_sad_value,not_sad,0.125,14,1
+ab_gender_value,female,0.2857142857142857,12,3
+ab_gender_value,male,0.1,8,0
+ab_voice_instrumental_value,voice,0.23529411764705882,15,3
+ab_voice_instrumental_value,instrumental,0.14285714285714285,5,0
+ab_timbre_value,dark,0.25,6,1
+ab_timbre_value,bright,0.1875,14,2
+ab_genre_dortmund_value,alternative,0.3333333333333333,1,0
+ab_genre_dortmund_value,electronic,0.19047619047619047,19,3
+ab_genre_rosamerica_value,hip,0.5,4,2
+ab_genre_rosamerica_value,rhy,0.2857142857142857,5,1
+ab_genre_rosamerica_value,roc,0.25,2,0
+ab_genre_rosamerica_value,pop,0.09090909090909091,9,0

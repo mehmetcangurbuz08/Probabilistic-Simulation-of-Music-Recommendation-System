@@ -1,0 +1,510 @@
+feature,value,prob,total_count,success_count
+primary_artist_name,Pink Floyd,0.8,8,7
+primary_artist_name,Nicky Jam,0.75,2,2
+primary_artist_name,Oasis,0.75,2,2
+primary_artist_name,Amy Winehouse,0.75,2,2
+primary_artist_name,Haddaway,0.75,2,2
+primary_artist_name,Surf Curse,0.75,2,2
+primary_artist_name,Daft Punk,0.75,2,2
+primary_artist_name,The Beatles,0.7142857142857143,5,4
+primary_artist_name,Alok,0.6666666666666666,1,1
+primary_artist_name,Avenged Sevenfold,0.6666666666666666,1,1
+primary_artist_name,Offset,0.6666666666666666,1,1
+primary_artist_name,Chief Keef,0.6666666666666666,1,1
+primary_artist_name,Keane,0.6666666666666666,1,1
+primary_artist_name,Pharrell Williams,0.6666666666666666,1,1
+primary_artist_name,Keala Settle,0.6666666666666666,1,1
+primary_artist_name,Piso 21,0.6666666666666666,1,1
+primary_artist_name,Rag'n'Bone Man,0.6666666666666666,1,1
+primary_artist_name,ROSALÍA,0.6666666666666666,1,1
+primary_artist_name,The Smiths,0.6666666666666666,1,1
+primary_artist_name,Chord Overstreet,0.6666666666666666,1,1
+primary_artist_name,Cher,0.6666666666666666,1,1
+primary_artist_name,blackbear,0.6666666666666666,1,1
+primary_artist_name,THE SCOTTS,0.6666666666666666,1,1
+primary_artist_name,Skillet,0.6666666666666666,1,1
+primary_artist_name,Galantis,0.6666666666666666,1,1
+primary_artist_name,Eagles,0.6666666666666666,4,3
+primary_artist_name,Fort Minor,0.6666666666666666,1,1
+primary_artist_name,Franz Ferdinand,0.6666666666666666,1,1
+primary_artist_name,Daryl Hall & John Oates,0.6666666666666666,1,1
+primary_artist_name,Jesse & Joy,0.6666666666666666,1,1
+primary_artist_name,Depeche Mode,0.6666666666666666,1,1
+primary_artist_name,Ice Cube,0.6666666666666666,1,1
+primary_artist_name,Travie McCoy,0.6666666666666666,1,1
+primary_artist_name,Mabel,0.6666666666666666,1,1
+primary_artist_name,Lynyrd Skynyrd,0.6666666666666666,1,1
+primary_artist_name,Alec Benjamin,0.6666666666666666,1,1
+primary_artist_name,Alex & Sierra,0.6666666666666666,1,1
+primary_artist_name,Portugal. The Man,0.6,3,2
+primary_artist_name,Mitski,0.6,3,2
+primary_artist_name,Arctic Monkeys,0.5666666666666667,28,16
+primary_artist_name,Flo Rida,0.5555555555555556,7,4
+primary_artist_name,Tame Impala,0.5384615384615384,11,6
+primary_artist_name,LP,0.5,2,1
+primary_artist_name,Queen,0.5,16,8
+primary_artist_name,grandson,0.5,2,1
+primary_artist_name,AURORA,0.5,2,1
+primary_artist_name,No Doubt,0.5,2,1
+primary_artist_name,Bob Marley & The Wailers,0.5,2,1
+primary_artist_name,Muse,0.5,2,1
+primary_artist_name,Led Zeppelin,0.5,6,3
+primary_artist_name,Polo G,0.5,2,1
+primary_artist_name,Bebe Rexha,0.5,2,1
+primary_artist_name,Avril Lavigne,0.5,4,2
+primary_artist_name,2Pac,0.5,2,1
+primary_artist_name,Foo Fighters,0.5,2,1
+primary_artist_name,Modjo,0.5,2,1
+primary_artist_name,Twenty One Pilots,0.5,2,1
+primary_artist_name,Evanescence,0.5,2,1
+primary_artist_name,Stephen Sanchez,0.5,2,1
+primary_artist_name,Stevie Wonder,0.5,2,1
+primary_artist_name,BANNERS,0.5,2,1
+primary_artist_name,Stromae,0.5,2,1
+primary_artist_name,CJ,0.5,2,1
+primary_artist_name,Three Days Grace,0.5,2,1
+primary_artist_name,Korn,0.5,2,1
+primary_artist_name,Maggie Lindemann,0.5,2,1
+primary_artist_name,Radiohead,0.5,12,6
+primary_artist_name,Chase Atlantic,0.5,2,1
+primary_artist_name,Michael Jackson,0.5,8,4
+primary_artist_name,Black Eyed Peas,0.5,4,2
+primary_artist_name,Nelly Furtado,0.5,2,1
+primary_artist_name,Eminem,0.5,42,21
+primary_artist_name,Coolio,0.5,6,3
+primary_artist_name,Hozier,0.5,16,8
+primary_artist_name,Jack Harlow,0.5,2,1
+primary_artist_name,Red Hot Chili Peppers,0.5,4,2
+primary_artist_name,Joel Adams,0.5,2,1
+primary_artist_name,Joji,0.5,2,1
+primary_artist_name,Disturbed,0.5,2,1
+primary_artist_name,Ghost,0.5,2,1
+primary_artist_name,Daddy Yankee,0.5,2,1
+primary_artist_name,James Arthur,0.5,4,2
+primary_artist_name,The Cranberries,0.5,2,1
+primary_artist_name,KAROL G,0.5,2,1
+primary_artist_name,Sia,0.5,2,1
+primary_artist_name,Spice Girls,0.5,2,1
+primary_artist_name,Adele,0.48,23,11
+primary_artist_name,Mac DeMarco,0.4444444444444444,7,3
+primary_artist_name,Creedence Clearwater Revival,0.42857142857142855,5,2
+primary_artist_name,System Of A Down,0.42857142857142855,5,2
+primary_artist_name,Passenger,0.42857142857142855,5,2
+primary_artist_name,Kendrick Lamar,0.42857142857142855,19,8
+primary_artist_name,The Neighbourhood,0.42857142857142855,12,5
+primary_artist_name,Dr. Dre,0.42857142857142855,5,2
+primary_artist_name,Pop Smoke,0.4,3,1
+primary_artist_name,Playboi Carti,0.4,3,1
+primary_artist_name,Neon Trees,0.4,3,1
+primary_artist_name,A$AP Rocky,0.4,3,1
+primary_artist_name,Macklemore,0.4,3,1
+primary_artist_name,Mark Ronson,0.4,13,5
+primary_artist_name,Green Day,0.4,3,1
+primary_artist_name,Don Omar,0.4,3,1
+primary_artist_name,SZA,0.4,3,1
+primary_artist_name,JAY-Z,0.4,3,1
+primary_artist_name,Hoobastank,0.4,3,1
+primary_artist_name,The Fray,0.4,3,1
+primary_artist_name,Jawsh 685,0.4,3,1
+primary_artist_name,Jessie J,0.4,3,1
+primary_artist_name,The White Stripes,0.4,3,1
+primary_artist_name,Rick Astley,0.4,3,1
+primary_artist_name,Enrique Iglesias,0.4,3,1
+primary_artist_name,Eurythmics,0.4,3,1
+primary_artist_name,Sub Urban,0.4,3,1
+primary_artist_name,"Earth, Wind & Fire",0.4,3,1
+primary_artist_name,GROUPLOVE,0.4,3,1
+primary_artist_name,UB40,0.4,3,1
+primary_artist_name,Metallica,0.375,14,5
+primary_artist_name,Lil Wayne,0.375,6,2
+primary_artist_name,The Rolling Stones,0.375,6,2
+primary_artist_name,Rammstein,0.375,6,2
+primary_artist_name,Gorillaz,0.375,6,2
+primary_artist_name,Nirvana,0.375,6,2
+primary_artist_name,Topic,0.375,6,2
+primary_artist_name,Lana Del Rey,0.37037037037037035,25,9
+primary_artist_name,Linkin Park,0.36363636363636365,20,7
+primary_artist_name,Billie Eilish,0.34285714285714286,33,11
+primary_artist_name,Trevor Daniel,0.3333333333333333,1,0
+primary_artist_name,Two Door Cinema Club,0.3333333333333333,1,0
+primary_artist_name,Tyga,0.3333333333333333,1,0
+primary_artist_name,Van Halen,0.3333333333333333,1,0
+primary_artist_name,USHER,0.3333333333333333,1,0
+primary_artist_name,U2,0.3333333333333333,1,0
+primary_artist_name,Wham!,0.3333333333333333,1,0
+primary_artist_name,Weezer,0.3333333333333333,1,0
+primary_artist_name,WALK THE MOON,0.3333333333333333,1,0
+primary_artist_name,Vanessa Carlton,0.3333333333333333,1,0
+primary_artist_name,Vance Joy,0.3333333333333333,4,1
+primary_artist_name,Alesso,0.3333333333333333,1,0
+primary_artist_name,Alejandro Fernández,0.3333333333333333,1,0
+primary_artist_name,Flipp Dinero,0.3333333333333333,1,0
+primary_artist_name,Florence + The Machine,0.3333333333333333,4,1
+primary_artist_name,Fitz and The Tantrums,0.3333333333333333,1,0
+primary_artist_name,Fifth Harmony,0.3333333333333333,1,0
+primary_artist_name,T-Pain,0.3333333333333333,1,0
+primary_artist_name,Steve Lacy,0.3333333333333333,1,0
+primary_artist_name,Eyedress,0.3333333333333333,1,0
+primary_artist_name,Empire Of The Sun,0.3333333333333333,1,0
+primary_artist_name,Elley Duhé,0.3333333333333333,1,0
+primary_artist_name,Felix Jaehn,0.3333333333333333,1,0
+primary_artist_name,Soulja Boy,0.3333333333333333,1,0
+primary_artist_name,Smash Mouth,0.3333333333333333,1,0
+primary_artist_name,Soda Stereo,0.3333333333333333,1,0
+primary_artist_name,Soft Cell,0.3333333333333333,1,0
+primary_artist_name,Don Toliver,0.3333333333333333,1,0
+primary_artist_name,Gucci Mane,0.3333333333333333,1,0
+primary_artist_name,DRAM,0.3333333333333333,1,0
+primary_artist_name,Shania Twain,0.3333333333333333,1,0
+primary_artist_name,Selena Gomez & The Scene,0.3333333333333333,1,0
+primary_artist_name,Hailee Steinfeld,0.3333333333333333,1,0
+primary_artist_name,Axwell /\ Ingrosso,0.3333333333333333,1,0
+primary_artist_name,Morat,0.3333333333333333,1,0
+primary_artist_name,Milky Chance,0.3333333333333333,1,0
+primary_artist_name,4 Non Blondes,0.3333333333333333,1,0
+primary_artist_name,alt-J,0.3333333333333333,1,0
+primary_artist_name,Zach Bryan,0.3333333333333333,1,0
+primary_artist_name,Zac Brown Band,0.3333333333333333,1,0
+primary_artist_name,X Ambassadors,0.3333333333333333,1,0
+primary_artist_name,Wisin,0.3333333333333333,1,0
+primary_artist_name,Alicia Keys,0.3333333333333333,1,0
+primary_artist_name,Myke Towers,0.3333333333333333,1,0
+primary_artist_name,Bill Withers,0.3333333333333333,1,0
+primary_artist_name,Lykke Li,0.3333333333333333,1,0
+primary_artist_name,Men At Work,0.3333333333333333,1,0
+primary_artist_name,Counting Crows,0.3333333333333333,1,0
+primary_artist_name,The Black Keys,0.3333333333333333,1,0
+primary_artist_name,Don Henley,0.3333333333333333,1,0
+primary_artist_name,Demi Lovato,0.3333333333333333,7,2
+primary_artist_name,Guns N' Roses,0.3333333333333333,16,5
+primary_artist_name,Gym Class Heroes,0.3333333333333333,1,0
+primary_artist_name,Rudimental,0.3333333333333333,1,0
+primary_artist_name,Sean Paul,0.3333333333333333,7,2
+primary_artist_name,Gente De Zona,0.3333333333333333,1,0
+primary_artist_name,Tainy,0.3333333333333333,1,0
+primary_artist_name,TOTO,0.3333333333333333,1,0
+primary_artist_name,GoldLink,0.3333333333333333,1,0
+primary_artist_name,David Guetta,0.3333333333333333,4,1
+primary_artist_name,John Denver,0.3333333333333333,1,0
+primary_artist_name,Joel Corry,0.3333333333333333,1,0
+primary_artist_name,Jimmy Eat World,0.3333333333333333,1,0
+primary_artist_name,The Notorious B.I.G.,0.3333333333333333,1,0
+primary_artist_name,Jennifer Lopez,0.3333333333333333,1,0
+primary_artist_name,The Killers,0.3333333333333333,1,0
+primary_artist_name,The Human League,0.3333333333333333,1,0
+primary_artist_name,Daniel Powter,0.3333333333333333,1,0
+primary_artist_name,The Game,0.3333333333333333,1,0
+primary_artist_name,Sean Kingston,0.3333333333333333,1,0
+primary_artist_name,Sade,0.3333333333333333,1,0
+primary_artist_name,Romeo Santos,0.3333333333333333,1,0
+primary_artist_name,JACKBOYS,0.3333333333333333,1,0
+primary_artist_name,Internet Money,0.3333333333333333,1,0
+primary_artist_name,Sech,0.3333333333333333,1,0
+primary_artist_name,Keyshia Cole,0.3333333333333333,1,0
+primary_artist_name,Loud Luxury,0.3333333333333333,1,0
+primary_artist_name,Danny Ocean,0.3333333333333333,1,0
+primary_artist_name,James TW,0.3333333333333333,1,0
+primary_artist_name,Jonas Brothers,0.3333333333333333,1,0
+primary_artist_name,KALEO,0.3333333333333333,1,0
+primary_artist_name,Kansas,0.3333333333333333,1,0
+primary_artist_name,James Bay,0.3333333333333333,1,0
+primary_artist_name,The Wanted,0.3333333333333333,1,0
+primary_artist_name,The Script,0.3333333333333333,1,0
+primary_artist_name,Jon Bellion,0.3333333333333333,1,0
+primary_artist_name,Rage Against The Machine,0.3333333333333333,1,0
+primary_artist_name,The Ronettes,0.3333333333333333,1,0
+primary_artist_name,Clairo,0.3333333333333333,1,0
+primary_artist_name,Jonas Blue,0.3333333333333333,1,0
+primary_artist_name,KYLE,0.3333333333333333,1,0
+primary_artist_name,Lou Bega,0.3333333333333333,1,0
+primary_artist_name,Lauv,0.3333333333333333,1,0
+primary_artist_name,The Righteous Brothers,0.3333333333333333,1,0
+primary_artist_name,Carly Rae Jepsen,0.3333333333333333,7,2
+primary_artist_name,R3HAB,0.3333333333333333,1,0
+primary_artist_name,Rachel Platten,0.3333333333333333,1,0
+primary_artist_name,R. City,0.3333333333333333,1,0
+primary_artist_name,The Offspring,0.3333333333333333,1,0
+primary_artist_name,League of Legends,0.3333333333333333,1,0
+primary_artist_name,Lil Mosey,0.3333333333333333,1,0
+primary_artist_name,The Chainsmokers,0.3333333333333333,7,2
+primary_artist_name,Declan McKenna,0.3333333333333333,1,0
+primary_artist_name,DaBaby,0.3333333333333333,1,0
+primary_artist_name,Roxette,0.3333333333333333,1,0
+primary_artist_name,Roddy Ricch,0.3333333333333333,1,0
+primary_artist_name,Rob $tone,0.3333333333333333,1,0
+primary_artist_name,*NSYNC,0.3333333333333333,1,0
+primary_artist_name,Mumford & Sons,0.3333333333333333,1,0
+primary_artist_name,Bee Gees,0.3333333333333333,1,0
+primary_artist_name,Becky G,0.3333333333333333,1,0
+primary_artist_name,Martin Garrix,0.3333333333333333,1,0
+primary_artist_name,Mario,0.3333333333333333,1,0
+primary_artist_name,Ozuna,0.3333333333333333,1,0
+primary_artist_name,Lilly Wood and The Prick,0.3333333333333333,1,0
+primary_artist_name,Phil Collins,0.3333333333333333,1,0
+primary_artist_name,Pearl Jam,0.3333333333333333,1,0
+primary_artist_name,Paramore,0.3333333333333333,4,1
+primary_artist_name,Panic! At The Disco,0.3333333333333333,1,0
+primary_artist_name,Maluma,0.3333333333333333,1,0
+primary_artist_name,Plain White T's,0.3333333333333333,1,0
+primary_artist_name,Pixies,0.3333333333333333,1,0
+primary_artist_name,Lil Nas X,0.3333333333333333,10,3
+primary_artist_name,M83,0.3333333333333333,1,0
+primary_artist_name,Backstreet Boys,0.3333333333333333,1,0
+primary_artist_name,Capital Cities,0.3333333333333333,1,0
+primary_artist_name,Cardi B,0.3333333333333333,4,1
+primary_artist_name,BØRNS,0.3333333333333333,1,0
+primary_artist_name,Brent Faiyaz,0.3333333333333333,1,0
+primary_artist_name,Breaking Benjamin,0.3333333333333333,1,0
+primary_artist_name,Calum Scott,0.3333333333333333,1,0
+primary_artist_name,Lukas Graham,0.3333333333333333,4,1
+primary_artist_name,Tones And I,0.3333333333333333,4,1
+primary_artist_name,Timbaland,0.3333333333333333,1,0
+primary_artist_name,The Who,0.3333333333333333,1,0
+primary_artist_name,Michael Bublé,0.3333333333333333,1,0
+primary_artist_name,Majestic,0.3333333333333333,1,0
+primary_artist_name,MEDUZA,0.3333333333333333,1,0
+primary_artist_name,Pitbull,0.3333333333333333,1,0
+primary_artist_name,A$AP Ferg,0.3333333333333333,1,0
+primary_artist_name,girl in red,0.3333333333333333,4,1
+primary_artist_name,Mr.Kitty,0.3333333333333333,1,0
+primary_artist_name,Morgan Wallen,0.3333333333333333,1,0
+primary_artist_name,Nico & Vinz,0.3333333333333333,1,0
+primary_artist_name,Nicki Minaj,0.3333333333333333,1,0
+primary_artist_name,Niall Horan,0.3333333333333333,1,0
+primary_artist_name,Men I Trust,0.3333333333333333,1,0
+primary_artist_name,Outkast,0.3333333333333333,4,1
+primary_artist_name,OneRepublic,0.3333333333333333,1,0
+primary_artist_name,Audioslave,0.3333333333333333,1,0
+primary_artist_name,Auli'i Cravalho,0.3333333333333333,1,0
+primary_artist_name,American Authors,0.3333333333333333,1,0
+primary_artist_name,Anitta,0.3333333333333333,1,0
+primary_artist_name,BlocBoy JB,0.3333333333333333,1,0
+primary_artist_name,Meek Mill,0.3333333333333333,1,0
+primary_artist_name,Natalia Lafourcade,0.3333333333333333,1,0
+primary_artist_name,Imagine Dragons,0.3103448275862069,27,8
+primary_artist_name,Kanye West,0.3103448275862069,27,8
+primary_artist_name,Frank Ocean,0.3,18,5
+primary_artist_name,BoyWithUke,0.3,8,2
+primary_artist_name,Shakira,0.3,8,2
+primary_artist_name,Fleetwood Mac,0.3,18,5
+primary_artist_name,The Police,0.3,8,2
+primary_artist_name,Cigarettes After Sex,0.3,8,2
+primary_artist_name,Olivia Rodrigo,0.29411764705882354,15,4
+primary_artist_name,Gabry Ponte,0.2857142857142857,5,1
+primary_artist_name,Rixton,0.2857142857142857,5,1
+primary_artist_name,Lord Huron,0.2857142857142857,5,1
+primary_artist_name,Justin Timberlake,0.2857142857142857,5,1
+primary_artist_name,Bon Jovi,0.2857142857142857,5,1
+primary_artist_name,21 Savage,0.2857142857142857,5,1
+primary_artist_name,Harry Styles,0.2777777777777778,16,4
+primary_artist_name,Sam Smith,0.2727272727272727,9,2
+primary_artist_name,ABBA,0.2727272727272727,9,2
+primary_artist_name,Lady Gaga,0.2692307692307692,24,6
+primary_artist_name,Alan Walker,0.25,2,0
+primary_artist_name,A Boogie Wit da Hoodie,0.25,2,0
+primary_artist_name,50 Cent,0.25,6,1
+primary_artist_name,Owl City,0.25,2,0
+primary_artist_name,Mike Posner,0.25,2,0
+primary_artist_name,Natalie Imbruglia,0.25,2,0
+primary_artist_name,GAYLE,0.25,2,0
+primary_artist_name,Ed Sheeran,0.25,22,5
+primary_artist_name,Young Thug,0.25,2,0
+primary_artist_name,Zedd,0.25,2,0
+primary_artist_name,bôa,0.25,2,0
+primary_artist_name,Lorde,0.25,2,0
+primary_artist_name,Lil Baby,0.25,2,0
+primary_artist_name,Labrinth,0.25,2,0
+primary_artist_name,Kelly Clarkson,0.25,2,0
+primary_artist_name,Kaash Paige,0.25,2,0
+primary_artist_name,Kate Bush,0.25,2,0
+primary_artist_name,Katy Perry,0.25,10,2
+primary_artist_name,Rae Sremmurd,0.25,2,0
+primary_artist_name,M.I.A.,0.25,2,0
+primary_artist_name,Mac Miller,0.25,2,0
+primary_artist_name,Lizzo,0.25,2,0
+primary_artist_name,Little Mix,0.25,2,0
+primary_artist_name,Luis Fonsi,0.25,10,2
+primary_artist_name,George Michael,0.25,2,0
+primary_artist_name,George Ezra,0.25,2,0
+primary_artist_name,Jack Johnson,0.25,2,0
+primary_artist_name,Soundgarden,0.25,2,0
+primary_artist_name,Tove Lo,0.25,2,0
+primary_artist_name,The Kooks,0.25,2,0
+primary_artist_name,The Lumineers,0.25,2,0
+primary_artist_name,Chris Jedi,0.25,2,0
+primary_artist_name,Calvin Harris,0.25,2,0
+primary_artist_name,Toploader,0.25,2,0
+primary_artist_name,Tom Petty,0.25,2,0
+primary_artist_name,"Tyler, The Creator",0.25,10,2
+primary_artist_name,mgk,0.25,2,0
+primary_artist_name,gnash,0.25,2,0
+primary_artist_name,Wallows,0.25,2,0
+primary_artist_name,Ava Max,0.25,2,0
+primary_artist_name,Beach House,0.25,2,0
+primary_artist_name,Bastille,0.25,2,0
+primary_artist_name,Baby Keem,0.25,2,0
+primary_artist_name,Tiësto,0.25,2,0
+primary_artist_name,Conan Gray,0.25,2,0
+primary_artist_name,Destiny's Child,0.25,2,0
+primary_artist_name,Dire Straits,0.25,2,0
+primary_artist_name,Tate McRae,0.25,2,0
+primary_artist_name,Future,0.25,2,0
+primary_artist_name,French Montana,0.25,2,0
+primary_artist_name,JENNIE,0.25,2,0
+primary_artist_name,John Lennon,0.25,2,0
+primary_artist_name,Hippie Sabotage,0.25,2,0
+primary_artist_name,House Of Pain,0.25,2,0
+primary_artist_name,Icona Pop,0.25,2,0
+primary_artist_name,Jason Mraz,0.25,2,0
+primary_artist_name,Ruth B.,0.25,2,0
+primary_artist_name,Lucenzo,0.25,2,0
+primary_artist_name,Pinkfong,0.25,2,0
+primary_artist_name,Dynoro,0.25,2,0
+primary_artist_name,The Calling,0.25,2,0
+primary_artist_name,Fall Out Boy,0.25,2,0
+primary_artist_name,Sublime,0.25,2,0
+primary_artist_name,Cheat Codes,0.25,2,0
+primary_artist_name,Chris Brown,0.25,6,1
+primary_artist_name,Carrie Underwood,0.25,2,0
+primary_artist_name,The Weeknd,0.2391304347826087,44,10
+primary_artist_name,XXXTENTACION,0.23529411764705882,15,3
+primary_artist_name,Taylor Swift,0.22916666666666666,46,10
+primary_artist_name,Ariana Grande,0.2222222222222222,25,5
+primary_artist_name,P!nk,0.2222222222222222,7,1
+primary_artist_name,Elton John,0.2222222222222222,7,1
+primary_artist_name,Rihanna,0.21739130434782608,21,4
+primary_artist_name,Travis Scott,0.21428571428571427,26,5
+primary_artist_name,Doja Cat,0.21428571428571427,12,2
+primary_artist_name,Juice WRLD,0.21428571428571427,12,2
+primary_artist_name,Britney Spears,0.21428571428571427,12,2
+primary_artist_name,Dua Lipa,0.21052631578947367,17,3
+primary_artist_name,Wiz Khalifa,0.2,3,0
+primary_artist_name,Nickelback,0.2,3,0
+primary_artist_name,One Direction,0.2,8,1
+primary_artist_name,NF,0.2,3,0
+primary_artist_name,Chris Stapleton,0.2,3,0
+primary_artist_name,DJ Khaled,0.2,3,0
+primary_artist_name,Chino & Nacho,0.2,3,0
+primary_artist_name,Bryan Adams,0.2,3,0
+primary_artist_name,Mustard,0.2,3,0
+primary_artist_name,Marshmello,0.2,8,1
+primary_artist_name,Meghan Trainor,0.2,3,0
+primary_artist_name,Migos,0.2,3,0
+primary_artist_name,Metro Boomin,0.2,3,0
+primary_artist_name,Slipknot,0.2,3,0
+primary_artist_name,Gotye,0.2,8,1
+primary_artist_name,Kings of Leon,0.2,3,0
+primary_artist_name,G-Eazy,0.2,3,0
+primary_artist_name,Lil Tjay,0.2,3,0
+primary_artist_name,Lil Uzi Vert,0.2,3,0
+primary_artist_name,Kygo,0.2,3,0
+primary_artist_name,Julia Michaels,0.2,3,0
+primary_artist_name,John Mayer,0.2,3,0
+primary_artist_name,Glass Animals,0.2,3,0
+primary_artist_name,Sam Hunt,0.2,3,0
+primary_artist_name,Duncan Laurence,0.2,3,0
+primary_artist_name,Bryson Tiller,0.2,3,0
+primary_artist_name,CKay,0.2,3,0
+primary_artist_name,Aventura,0.2,3,0
+primary_artist_name,Camila Cabello,0.2,8,1
+primary_artist_name,Post Malone,0.19230769230769232,24,4
+primary_artist_name,Coldplay,0.1875,14,2
+primary_artist_name,Maroon 5,0.18181818181818182,9,1
+primary_artist_name,DJ Snake,0.18181818181818182,9,1
+primary_artist_name,Avicii,0.18181818181818182,9,1
+primary_artist_name,Bruno Mars,0.18181818181818182,9,1
+primary_artist_name,Dominic Fike,0.16666666666666666,4,0
+primary_artist_name,Anuel AA,0.16666666666666666,4,0
+primary_artist_name,5 Seconds of Summer,0.16666666666666666,4,0
+primary_artist_name,Alessia Cara,0.16666666666666666,4,0
+primary_artist_name,Clean Bandit,0.16666666666666666,4,0
+primary_artist_name,$uicideboy$,0.16666666666666666,4,0
+primary_artist_name,The Pussycat Dolls,0.16666666666666666,4,0
+primary_artist_name,Zac Efron,0.16666666666666666,4,0
+primary_artist_name,Manuel Turizo,0.16666666666666666,4,0
+primary_artist_name,AC/DC,0.16666666666666666,22,3
+primary_artist_name,Jason Derulo,0.16666666666666666,4,0
+primary_artist_name,Kali Uchis,0.16666666666666666,4,0
+primary_artist_name,Charlie Puth,0.16666666666666666,4,0
+primary_artist_name,Halsey,0.16666666666666666,4,0
+primary_artist_name,Dusty Springfield,0.16666666666666666,4,0
+primary_artist_name,Shawn Mendes,0.15384615384615385,11,1
+primary_artist_name,Lewis Capaldi,0.15384615384615385,11,1
+primary_artist_name,Y2K,0.14285714285714285,5,0
+primary_artist_name,TV Girl,0.14285714285714285,5,0
+primary_artist_name,Childish Gambino,0.14285714285714285,5,0
+primary_artist_name,Zara Larsson,0.14285714285714285,5,0
+primary_artist_name,Måneskin,0.14285714285714285,5,0
+primary_artist_name,Macklemore & Ryan Lewis,0.14285714285714285,5,0
+primary_artist_name,Major Lazer,0.14285714285714285,5,0
+primary_artist_name,Paulo Londra,0.14285714285714285,5,0
+primary_artist_name,Gesaffelstein,0.14285714285714285,5,0
+primary_artist_name,Ellie Goulding,0.14285714285714285,5,0
+primary_artist_name,J. Cole,0.14285714285714285,5,0
+primary_artist_name,The Cure,0.14285714285714285,5,0
+primary_artist_name,Estelle,0.14285714285714285,5,0
+primary_artist_name,Drake,0.13043478260869565,21,2
+primary_artist_name,ZAYN,0.125,6,0
+primary_artist_name,Miley Cyrus,0.125,6,0
+primary_artist_name,PARTYNEXTDOOR,0.125,6,0
+primary_artist_name,BTS,0.125,6,0
+primary_artist_name,BLACKPINK,0.125,6,0
+primary_artist_name,Selena Gomez,0.1111111111111111,7,0
+primary_artist_name,J Balvin,0.1111111111111111,7,0
+primary_artist_name,Beyoncé,0.1111111111111111,7,0
+primary_artist_name,Justin Bieber,0.1,8,0
+primary_artist_name,Khalid,0.09090909090909091,9,0
+primary_artist_name,Bad Bunny,0.07692307692307693,24,1
+explicit,False,0.2416058394160584,1368,330
+explicit,True,0.2146690518783542,557,119
+year_bin,1990s,0.34523809523809523,82,28
+year_bin,pre_1980,0.31521739130434784,90,28
+year_bin,1980s,0.26582278481012656,77,20
+year_bin,2000s,0.26223776223776224,284,74
+year_bin,2010s,0.2168560606060606,1054,228
+year_bin,2020s,0.21176470588235294,338,71
+popularity_bin,very_high,0.3137755102040816,390,122
+popularity_bin,high,0.25547445255474455,546,139
+popularity_bin,low,0.19135802469135801,484,92
+popularity_bin,very_low,0.1913214990138067,505,96
+duration_bin,long,0.3798449612403101,127,48
+duration_bin,medium,0.2322623828647925,1492,346
+duration_bin,short,0.18181818181818182,306,55
+markets_bin,medium,0.26461038961038963,614,162
+markets_bin,few,0.23013698630136986,728,167
+markets_bin,many,0.20618556701030927,580,119
+ab_danceability_value,not_danceable,0.3045045045045045,553,168
+ab_danceability_value,danceable,0.2052401746724891,1372,281
+ab_mood_acoustic_value,not_acoustic,0.23388116308470291,1580,369
+ab_mood_acoustic_value,acoustic,0.2334293948126801,345,80
+ab_mood_aggressive_value,not_aggressive,0.23645598194130926,1770,418
+ab_mood_aggressive_value,aggressive,0.20382165605095542,155,31
+ab_mood_electronic_value,electronic,0.2429837518463811,1352,328
+ab_mood_electronic_value,not_electronic,0.21217391304347827,573,121
+ab_mood_happy_value,not_happy,0.23970588235294119,1358,325
+ab_mood_happy_value,happy,0.21968365553602812,567,124
+ab_mood_party_value,not_party,0.2529411764705882,1188,300
+ab_mood_party_value,party,0.2029769959404601,737,149
+ab_mood_relaxed_value,relaxed,0.24415975885455915,1325,323
+ab_mood_relaxed_value,not_relaxed,0.21096345514950166,600,126
+ab_mood_sad_value,not_sad,0.23855092276144907,1461,348
+ab_mood_sad_value,sad,0.21888412017167383,464,101
+ab_gender_value,male,0.25846702317290554,559,144
+ab_gender_value,female,0.2236842105263158,1366,305
+ab_voice_instrumental_value,instrumental,0.2734375,638,174
+ab_voice_instrumental_value,voice,0.21411947245927077,1287,275
+ab_timbre_value,dark,0.2614445574771109,981,256
+ab_timbre_value,bright,0.20507399577167018,944,193
+ab_genre_dortmund_value,jazz,0.5,2,1
+ab_genre_dortmund_value,blues,0.4,3,1
+ab_genre_dortmund_value,rock,0.375,6,2
+ab_genre_dortmund_value,alternative,0.2727272727272727,9,2
+ab_genre_dortmund_value,electronic,0.2349785407725322,1862,437
+ab_genre_dortmund_value,folkcountry,0.15555555555555556,43,6
+ab_genre_rosamerica_value,roc,0.3073170731707317,203,62
+ab_genre_rosamerica_value,jaz,0.2727272727272727,20,5
+ab_genre_rosamerica_value,hip,0.2708333333333333,286,77
+ab_genre_rosamerica_value,cla,0.24,23,5
+ab_genre_rosamerica_value,pop,0.225114854517611,651,146
+ab_genre_rosamerica_value,dan,0.225,158,35
+ab_genre_rosamerica_value,rhy,0.20477815699658702,584,119
