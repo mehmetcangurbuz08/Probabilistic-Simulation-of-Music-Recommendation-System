@@ -206,22 +206,21 @@ def compute_global_probability(track: pd.Series) -> float:
     score *= get_prob("markets_bin", track.get("markets_bin", "many"), default=0.2)
 
     # ---- ab_ feature’lar (genre/mood/timbre vs) ----
-    # Burada “çok fazla kolon” çarpmak skoru aşırı küçültebilir.
-    # O yüzden en etkili gördüklerini seç (senin eski dict’lerinden).
+    # Part 1 CSV'deki isimlerle uyumlu olmalı!
     ab_cols = [
         "ab_genre_rosamerica_value",
         "ab_genre_dortmund_value",
         "ab_timbre_value",
         "ab_danceability_value",
-        "ab_acousticness_value",
-        "ab_aggressiveness_value",
-        "ab_electronic_value",
+        "ab_mood_acoustic_value",      # CSV'de bu isimle kayıtlı
+        "ab_mood_aggressive_value",    # CSV'de bu isimle kayıtlı
+        "ab_mood_electronic_value",    # CSV'de bu isimle kayıtlı
         "ab_mood_happy_value",
         "ab_mood_party_value",
         "ab_mood_relaxed_value",
         "ab_mood_sad_value",
         "ab_gender_value",
-        "ab_voice_value",
+        "ab_voice_instrumental_value", # CSV'de bu isimle kayıtlı
     ]
 
     for c in ab_cols:
@@ -238,6 +237,7 @@ def compute_global_probability(track: pd.Series) -> float:
 # ================================================================
 
 # Analiz edilecek feature'lar (bonus için aday olanlar)
+# Part 1 CSV'deki isimlerle uyumlu olmalı!
 PERSONALIZABLE_FEATURES = [
     "primary_artist_name",
     "ab_genre_rosamerica_value",
@@ -246,9 +246,12 @@ PERSONALIZABLE_FEATURES = [
     "ab_mood_sad_value",
     "ab_mood_party_value",
     "ab_mood_relaxed_value",
+    "ab_mood_acoustic_value",
+    "ab_mood_aggressive_value",
+    "ab_mood_electronic_value",
     "ab_danceability_value",
     "ab_timbre_value",
-    "ab_voice_value",
+    "ab_voice_instrumental_value",  # CSV'deki isimle uyumlu
     "ab_gender_value",
     "year_bin",
     "popularity_bin",

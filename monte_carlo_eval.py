@@ -29,9 +29,9 @@ CONTINUOUS_PREF_FEATURES = [
 # 2. KATEGORİK ÖZELLİKLER (kullanıcının tercih ettiği kategoriler)
 # Her kullanıcı bu kategorilerden bazılarını tercih edecek
 CATEGORICAL_PREF_FEATURES = {
-    # Genre tercihleri (Part 1'deki genre binning)
+    # Genre tercihleri (Part 1 CSV'deki değerlerle uyumlu!)
     "ab_genre_rosamerica_value": [
-        "hip", "rhy", "roc", "pop", "dan", "cla", "jaz", "reg", "cou", "lat", "met", "ele"
+        "hip", "rhy", "roc", "pop", "dan", "cla", "jaz"  # CSV'de sadece bunlar var
     ],
     # Dortmund genre
     "ab_genre_dortmund_value": [
@@ -54,7 +54,7 @@ CATEGORICAL_PREF_FEATURES = {
     "ab_mood_sad_value": ["sad", "not_sad"],
     # Danceability
     "ab_danceability_value": ["danceable", "not_danceable"],
-    # Voice vs Instrumental
+    # Voice vs Instrumental (CSV'deki isimle uyumlu)
     "ab_voice_instrumental_value": ["voice", "instrumental"],
     # Timbre
     "ab_timbre_value": ["bright", "dark"],
@@ -519,12 +519,25 @@ class UserProfile:
             if first_five_idx is None and rating == 5:
                 first_five_idx = idx + 1  # 1-indexed
         
-        # Sabır öğrenme: İlk 5★'a kadar geçen süre
-        if first_five_idx is not None:
-            self.learned_patience = first_five_idx
-        else:
-            # Hiç 5★ vermediyse, tüm warm-up boyunca sabretmiş demek
-            self.learned_patience = len(warmup_track_ids)
+        # Sabır öğrenme: Bayesian yaklaşım (Part 2 ile uyumlu)
+        # Tek bir gözlem yerine, tüm warm-up verisinden tahmin et
+        n_fives_warmup = sum(1 for r in self.warmup_ratings if r == 5)
+        n_total_warmup = len(self.warmup_ratings)
+        
+        # Bayesian posterior: p | data ~ Beta(ALPHA + n_fives, BETA + n_not_fives)
+        alpha_post = ALPHA + n_fives_warmup
+        beta_post = BETA + (n_total_warmup - n_fives_warmup)
+        
+        # Posterior mean'den beklenen Tu
+        estimated_p = alpha_post / (alpha_post + beta_post)
+        expected_Tu = 1.0 / estimated_p
+        
+        # Sabır limitini bu tahmine göre ayarla
+        # Tu'nun tam sayı versiyonu + biraz tolerans
+        self.learned_patience = max(2, int(np.ceil(expected_Tu)))
+        
+        # Ayrıca orijinal gözlemi de sakla (karşılaştırma için)
+        self.observed_first_five = first_five_idx
         
         # Tercih öğrenme: Yüksek puanlanan şarkıların özelliklerinden
         self._learn_preferences_from_warmup()
