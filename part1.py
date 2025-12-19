@@ -1,52 +1,58 @@
-import pandas as pd
-import numpy as np
-
-
-# ============================================================
-# 1. DATA LOADING
-# ============================================================
-
 import os
 import re
+import pandas as pd
+import numpy as np
+from itertools import combinations
+
+
+# 1. DATA LOADING
 
 def _safe_name(s: str) -> str:
+    """Make a string safe for file or column names."""
     s = str(s)
     s = re.sub(r"[^a-zA-Z0-9_\-]+", "_", s)
     return s.strip("_")
 
+
 def stats_to_long(stats_df, feature_cols, pair_name=None):
     """
-    stats_df: calculate_smoothed_prob çıktısı (index = feature_cols, columns: total_count, success_count, prob)
-    feature_cols: ['col'] veya ['col1','col2']
+    Converts conditional probability tables into long format.
+
+    stats_df: output of calculate_smoothed_prob
+    feature_cols: ['col'] or ['col1', 'col2']
     """
     out = stats_df.reset_index().copy()
     out.insert(0, "feature", pair_name if pair_name else "|".join(feature_cols))
 
-    # feature value kolonlarını v1, v2 diye normalize et
+    # Rename feature value columns as v1, v2, ...
     for i, c in enumerate(feature_cols, start=1):
         out.rename(columns={c: f"v{i}"}, inplace=True)
 
-    # sabitle
-    keep = ["feature"] + [f"v{i}" for i in range(1, len(feature_cols)+1)] + ["prob", "total_count", "success_count"]
+    keep = (
+            ["feature"]
+            + [f"v{i}" for i in range(1, len(feature_cols) + 1)]
+            + ["prob", "total_count", "success_count"]
+    )
     return out[keep]
 
-def ensure_dir(path):
-    os.makedirs(path, exist_ok=True)
 
+def ensure_dir(path):
+    """Create directory if it does not exist."""
+    os.makedirs(path, exist_ok=True)
 
 
 def load_data():
     print(">>> Loading CSV files...")
 
-    # TRACKS
+    # Tracks
     try:
-        tracks = pd.read_csv("tracks.csv")
+        tracks = pd.read_csv("../tracks.csv")
         print(f"Tracks loaded: {len(tracks)} rows.")
-    except:
+    except Exception:
         print("ERROR: tracks.csv not found!")
         return None, None, None
 
-    # GLOBAL RATINGS
+    # Global ratings
     try:
         global_ratings = pd.read_csv("ratings.csv", sep=";")
         if len(global_ratings.columns) < 3:
@@ -56,7 +62,7 @@ def load_data():
         print("ERROR loading ratings.csv:", e)
         return None, None, None
 
-    # PERSONAL RATINGS
+    # Personal ratings
     try:
         my_ratings = pd.read_csv("sarkilar.csv", sep=";", header=None)
         my_ratings = my_ratings.iloc[:, [0, 1, 2, 4]]
@@ -70,33 +76,34 @@ def load_data():
     return tracks, global_ratings, my_ratings
 
 
-# ============================================================
 # 2. MERGE AND TARGET VARIABLE
-# ============================================================
 
 def merge_and_prep(ratings_df, tracks_df):
-    df = pd.merge(ratings_df, tracks_df,
-                  left_on="song_id", right_on="track_id",
-                  how="left")
+    """Merge ratings with track metadata and create target variable."""
+    df = pd.merge(
+        ratings_df,
+        tracks_df,
+        left_on="song_id",
+        right_on="track_id",
+        how="left"
+    )
     df["is_5_star"] = (df["rating"] == 5).astype(int)
     return df
 
 
-# ============================================================
 # 3. BINNING FOR NUMERIC FEATURES
-# ============================================================
 
 def apply_binning(df):
+    """Discretize numeric features into categorical bins."""
 
-    # Popularity
     if "track_popularity" in df.columns:
         df["popularity_bin"] = pd.qcut(
-            df["track_popularity"], q=4,
+            df["track_popularity"],
+            q=4,
             labels=["very_low", "low", "high", "very_high"],
             duplicates="drop"
         )
 
-    # Duration
     if "duration_ms" in df.columns:
         df["duration_bin"] = pd.cut(
             df["duration_ms"] / 1000,
@@ -104,12 +111,13 @@ def apply_binning(df):
             labels=["short", "medium", "long"]
         )
 
-    # Markets — flexible binning
     if "available_markets_count" in df.columns:
         try:
             _, bins = pd.qcut(
-                df["available_markets_count"], q=3,
-                retbins=True, duplicates="drop"
+                df["available_markets_count"],
+                q=3,
+                retbins=True,
+                duplicates="drop"
             )
             num_bins = len(bins) - 1
             if num_bins == 3:
@@ -119,78 +127,86 @@ def apply_binning(df):
             else:
                 labels = [f"bin_{i}" for i in range(num_bins)]
 
-            df["markets_bin"] = pd.cut(df["available_markets_count"],
-                                       bins=bins, labels=labels)
-        except:
+            df["markets_bin"] = pd.cut(
+                df["available_markets_count"],
+                bins=bins,
+                labels=labels
+            )
+        except Exception:
             df["markets_bin"] = "unknown"
 
-    # Year binning
     if "album_release_year" in df.columns:
         df["year_bin"] = pd.cut(
             df["album_release_year"],
             bins=[0, 1979, 1989, 1999, 2009, 2019, 2035],
-            labels=["pre_1980", "1980s", "1990s", "2000s", "2010s", "2020s"]
+            labels=[
+                "pre_1980", "1980s", "1990s",
+                "2000s", "2010s", "2020s"
+            ]
         )
 
     return df
 
 
-# ============================================================
 # 4. LAPLACE CONDITIONAL PROBABILITY
-# ============================================================
 
 def calculate_smoothed_prob(df, features, target="is_5_star", alpha=1):
-    stats = df.groupby(features)[target].agg(["count", "sum"])
+    """Compute Laplace-smoothed conditional probabilities."""
+    stats = df.groupby(features, observed=False)[target].agg(["count", "sum"])
     stats.columns = ["total_count", "success_count"]
-    k = 2  # binary: 5★ vs not
-    stats["prob"] = (stats["success_count"] + alpha) / \
-                    (stats["total_count"] + alpha * k)
+
+    k = 2  # Binary outcome: 5★ vs not 5★
+    stats["prob"] = (
+            (stats["success_count"] + alpha)
+            / (stats["total_count"] + alpha * k)
+    )
+
     return stats.sort_values("prob", ascending=False)
 
-# ============================================================
-# 4.5 EXPORT HELPERS (CSV OUTPUT)
-# ============================================================
 
-def ensure_dir(path):
-    os.makedirs(path, exist_ok=True)
+# 4.5 EXPORT HELPERS (CSV OUTPUT)
 
 def export_single_feature_probs(df, feature_list, out_csv, alpha=1):
-    """
-    Tekil feature'lar için P(5★ | feature=value) tablolarını tek CSV'ye long-format yazar.
-    CSV kolonları: feature, value, prob, total_count, success_count
-    """
+    """Export P(5★ | feature=value) tables into one CSV."""
     rows = []
+
     for feat in feature_list:
         if feat not in df.columns:
             continue
+
         stats = calculate_smoothed_prob(df, [feat], alpha=alpha).reset_index()
         stats.rename(columns={feat: "value"}, inplace=True)
         stats.insert(0, "feature", feat)
-        rows.append(stats[["feature", "value", "prob", "total_count", "success_count"]])
 
-    out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
-        columns=["feature", "value", "prob", "total_count", "success_count"]
+        rows.append(
+            stats[["feature", "value", "prob", "total_count", "success_count"]]
+        )
+
+    out = (
+        pd.concat(rows, ignore_index=True)
+        if rows
+        else pd.DataFrame(
+            columns=["feature", "value", "prob", "total_count", "success_count"]
+        )
     )
+
     out.to_csv(out_csv, index=False)
 
 
 def export_top_interactions(df, out_csv, top_k=10, min_count=30, alpha=1):
-    """
-    run_task2 içindeki mantığı kullanır ama print yerine CSV üretir.
-    CSV kolonları: f1, f2, v1, v2, prob, total_count, success_count, score
-    """
-    from itertools import combinations
+    """Export strongest feature interactions into CSV."""
 
-    blacklist = ["is_5_star", "rating", "track_id", "user_id",
-                 "track_name", "artist_name", "album_name",
-                 "uri", "url", "mbid", "score", "index"]
+    blacklist = [
+        "is_5_star", "rating", "track_id", "user_id",
+        "track_name", "artist_name", "album_name",
+        "uri", "url", "mbid", "score", "index"
+    ]
 
-    valid_cols = []
-    for col in df.columns:
-        if any(b in col for b in blacklist):
-            continue
-        if df[col].nunique() < 50:
-            valid_cols.append(col)
+    valid_cols = [
+        col for col in df.columns
+        if not any(b in col for b in blacklist)
+           and df[col].nunique() < 50
+    ]
 
     all_pairs = list(combinations(valid_cols, 2))
 
@@ -203,29 +219,41 @@ def export_top_interactions(df, out_csv, top_k=10, min_count=30, alpha=1):
     )
 
     rows = []
+
     for inter in top_results:
-        f1, f2, score = inter["f1"], inter["f2"], inter["score"]
-        table = inter["table"].reset_index()  # index: (f1, f2)
+        table = inter["table"].reset_index()
+        table.rename(
+            columns={inter["f1"]: "v1", inter["f2"]: "v2"},
+            inplace=True
+        )
 
-        # tablo kolon isimleri f1,f2 olacak; v1,v2'ye çeviriyoruz
-        table.rename(columns={f1: "v1", f2: "v2"}, inplace=True)
-        table.insert(0, "f1", f1)
-        table.insert(1, "f2", f2)
-        table["score"] = score
+        table.insert(0, "f1", inter["f1"])
+        table.insert(1, "f2", inter["f2"])
+        table["score"] = inter["score"]
 
-        rows.append(table[["f1", "f2", "v1", "v2", "prob", "total_count", "success_count", "score"]])
+        rows.append(
+            table[
+                ["f1", "f2", "v1", "v2",
+                 "prob", "total_count", "success_count", "score"]
+            ]
+        )
 
-    out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
-        columns=["f1", "f2", "v1", "v2", "prob", "total_count", "success_count", "score"]
+    out = (
+        pd.concat(rows, ignore_index=True)
+        if rows
+        else pd.DataFrame(
+            columns=[
+                "f1", "f2", "v1", "v2",
+                "prob", "total_count", "success_count", "score"
+            ]
+        )
     )
+
     out.to_csv(out_csv, index=False)
 
 
 def export_posteriors_task3(df, out_csv):
-    """
-    Task3'te bastığın posteriorları CSV'ye yazar.
-    CSV kolonları: feature, value, posterior
-    """
+    """Export posterior distributions used in Task 3."""
     subset = df[df["is_5_star"] == 1]
     rows = []
 
@@ -242,36 +270,34 @@ def export_posteriors_task3(df, out_csv):
         dist.insert(0, "feature", f"P({col_name} | 5star)")
         rows.append(dist)
 
-    out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
-        columns=["feature", "value", "posterior"]
+    out = (
+        pd.concat(rows, ignore_index=True)
+        if rows
+        else pd.DataFrame(columns=["feature", "value", "posterior"])
     )
+
     out.to_csv(out_csv, index=False)
 
 
-
-# ============================================================
 # 5. TASK 2 INTERACTION SCORING
-# ============================================================
 
-def find_top_interactions(df, candidate_pairs,
-                          top_k=5, min_count=25, alpha=1):
-
+def find_top_interactions(df, candidate_pairs, top_k=5, min_count=25, alpha=1):
+    """Find strongest feature interactions based on deviation from global mean."""
     results = []
     global_p = df["is_5_star"].mean()
 
     for f1, f2 in candidate_pairs:
-
         if f1 not in df.columns or f2 not in df.columns:
             continue
 
         stats = calculate_smoothed_prob(df, [f1, f2], alpha=alpha)
         valid = stats[stats["total_count"] >= min_count]
-        if len(valid) == 0:
+
+        if valid.empty:
             continue
 
-        # Interaction score = weighted deviation from global mean
         weight = valid["total_count"] / valid["total_count"].sum()
-        score = ((valid["prob"] - global_p)**2 * weight).sum()
+        score = ((valid["prob"] - global_p) ** 2 * weight).sum()
 
         results.append({
             "f1": f1,
@@ -280,171 +306,112 @@ def find_top_interactions(df, candidate_pairs,
             "table": valid.sort_values("prob", ascending=False)
         })
 
-    # sort by score
-    results = sorted(results, key=lambda x: x["score"], reverse=True)
+    results.sort(key=lambda x: x["score"], reverse=True)
     return results[:top_k]
 
 
-from itertools import combinations
+# 6. TASK 2 — PRINTED ANALYSIS
 
 def run_task2(df):
-    print("\n===== TASK 2: OTOMATİK ETKİLEŞİM KEŞFİ (TÜM İKİLİLER) =====\n")
+    print("\n===== TASK 2: Automatic Interaction Discovery =====\n")
 
-    # 1. ANALİZE SOKULACAK SÜTUNLARI SEÇ (Filtreleme)
-    # Her sütunu birbirine çarparsak bilgisayar kilitlenir veya saçmalar.
-    # O yüzden sadece "Kategorik" ve "Mantıklı" olanları seçiyoruz.
+    blacklist = [
+        "is_5_star", "rating", "track_id", "user_id",
+        "track_name", "artist_name", "album_name",
+        "uri", "url", "mbid", "score", "index"
+    ]
 
-    valid_cols = []
+    valid_cols = [
+        col for col in df.columns
+        if not any(b in col for b in blacklist)
+           and df[col].nunique() < 50
+    ]
 
-    # YASAKLI LİSTESİ:
-    # 1. Hedef Değişkenler (Bunları feature olarak alırsan hile olur!)
-    # 2. ID ve İsimler (Bunların analizi olmaz)
-    blacklist = ["is_5_star", "rating", "track_id", "user_id",
-                 "track_name", "artist_name", "album_name",
-                 "uri", "url", "mbid", "score", "index"]
-
-    for col in df.columns:
-        # Yasaklı kelime içeriyor mu?
-        if any(b in col for b in blacklist):
-            continue
-
-        # Sadece KATEGORİK verileri al (Sayısal gürültüyü engelle)
-        # Kural: Bir sütunun 50'den az çeşidi varsa (Mood, Genre, Key vb.) alalım.
-        # 50'den çoksa (Örn: 0.543, 0.112 gibi float değerler) almayalım.
-        if df[col].nunique() < 50:
-            valid_cols.append(col)
-
-    print(f"Analiz edilecek özellikler ({len(valid_cols)} adet):")
+    print(f"Features used ({len(valid_cols)}):")
     print(valid_cols)
     print("-" * 40)
 
-    # 2. TÜM KOMBİNASYONLARI OLUŞTUR
-    # Matematikteki C(n, 2) işlemi.
-    # Örn: [A, B, C] -> (A,B), (A,C), (B,C)
     all_pairs = list(combinations(valid_cols, 2))
+    print(f"Checking {len(all_pairs)} feature pairs...")
 
-    print(f"Toplam {len(all_pairs)} farklı ikili kombinasyon taranıyor...")
-
-    # 3. HEPSİNİ HESAPLA (Mevcut fonksiyonu kullanıyoruz)
-    # min_count=30 yaptık ki sadece tesadüf olan 3-5 şarkılık grupları bulmasın.
     top_results = find_top_interactions(
         df,
         candidate_pairs=all_pairs,
-        top_k=10,       # En iyi 10 sonucu getir
-        min_count=30,   # En az 30 şarkı olsun
+        top_k=10,
+        min_count=30,
         alpha=1
     )
 
-    # 4. SONUÇLARI YAZDIR
-    print("\n>>> BULUNAN EN GÜÇLÜ ETKİLEŞİMLER:\n")
+    print("\n>>> Strongest interactions:\n")
     for i, inter in enumerate(top_results):
         print("=" * 60)
-        print(f"#{i+1}: {inter['f1']}  [x]  {inter['f2']}")
-        print(f"Etki Gücü (Score): {inter['score']:.4f}")
-        print("Detaylar (En Yüksek Olasılıklı Gruplar):")
-
-        # Tabloyu biraz sadeleştirelim
-        view = inter["table"][["prob", "total_count", "success_count"]].head(3)
-        print(view)
+        print(f"#{i + 1}: {inter['f1']} x {inter['f2']}")
+        print(f"Score: {inter['score']:.4f}")
+        print(inter["table"][["prob", "total_count", "success_count"]].head(3))
         print()
+
+
 # ============================================================
-# 6. TASK 3 — BAYESIAN ANALYSIS
+# 7. TASK 3 — BAYESIAN ANALYSIS
 # ============================================================
 
 def run_task3(df):
-    print("\n===== TASK 3: Bayesian Interpretation (Posterior Probabilities) =====\n")
+    print("\n===== TASK 3: Bayesian Interpretation =====\n")
 
-    # Sadece 5 yıldız alanları (Başarılıları) çekiyoruz
     subset = df[df["is_5_star"] == 1]
 
-    # ---------------------------------------------------------
-    # 1. P(Artist | 5★) - Zaten vardı
-    # ---------------------------------------------------------
-    print(">>> ANALİZ A: P(Artist | 5★)")
-    print("5 Yıldız verdiğin bir şarkının hangi sanatçıdan olma ihtimali yüksek?")
-    dist_artist = subset["primary_artist_name"].value_counts(normalize=True)
-    print(dist_artist.head(10))
+    print(">>> P(Artist | 5★)")
+    print(subset["primary_artist_name"].value_counts(normalize=True).head(10))
     print("-" * 40)
 
-    # ---------------------------------------------------------
-    # 2. P(Genre_Dortmund | 5★) - Yeni Eklenen
-    # ---------------------------------------------------------
     col_name = "ab_genre_dortmund_value"
-
     if col_name in df.columns:
-        print(f"\n>>> ANALİZ B: P({col_name} | 5★)")
-        print("5 Yıldız verdiğin bir şarkının hangi Dortmund Türünden olma ihtimali yüksek?")
+        print(f"\n>>> P({col_name} | 5★)")
+        dist = subset[col_name].value_counts(normalize=True)
+        print(dist)
 
-        # normalize=True diyerek sayıyı değil, yüzdeyi (olasılığı) alıyoruz
-        dist_genre = subset[col_name].value_counts(normalize=True)
-
-        # Sonuçları yazdır
-        print(dist_genre)
-
-        # Görsel olarak yorumlamak için:
-        top_genre = dist_genre.index[0]
-        top_prob = dist_genre.iloc[0]
-        print(f"\n[YORUM]: 5 yıldız verdiğin şarkıların %{top_prob*100:.1f}'i '{top_genre}' türünde.")
-    else:
-        print(f"UYARI: {col_name} sütunu verisetinde bulunamadı!")
+        top_genre = dist.index[0]
+        top_prob = dist.iloc[0]
+        print(f"\n[Comment]: {top_prob * 100:.1f}% are '{top_genre}'")
 
 
-# ============================================================
-# 7. TASK 4 — PERSONAL VS GLOBAL
-# ============================================================
+# 8. TASK 4 — PERSONAL VS GLOBAL
 
 def run_task4(df_global, df_personal):
-
-    print("\n===== TASK 4: Personal vs Global Comparison =====")
+    print("\n===== TASK 4: Personal vs Global =====")
 
     feature = "ab_genre_rosamerica_value"
-
     if feature not in df_global.columns:
         print("Genre feature missing.")
         return
 
-    print("\nYour personal taste for genre:")
+    print("\nPersonal taste:")
     print(calculate_smoothed_prob(df_personal, feature).head(5))
 
-    print("\nGlobal taste for genre:")
+    print("\nGlobal taste:")
     print(calculate_smoothed_prob(df_global, feature).head(5))
 
 
-# ============================================================
-# 8. MAIN
-# ============================================================
+# 9. MAIN
 
 def main():
-
     tracks, raw_global, raw_personal = load_data()
     if tracks is None:
         return
 
-    df_global = merge_and_prep(raw_global, tracks)
-    df_personal = merge_and_prep(raw_personal, tracks)
+    df_global = apply_binning(merge_and_prep(raw_global, tracks))
+    df_personal = apply_binning(merge_and_prep(raw_personal, tracks))
 
-    df_global = apply_binning(df_global)
-    df_personal = apply_binning(df_personal)
-
-    print("\n==============================================")
-    print(" PART 1 ANALYSIS RESULTS ")
-    print("==============================================\n")
-
-    # ------------------------------
-    # TASK 1
-    # ------------------------------
-    print(">>> TASK 1: Global Conditional Probabilities\n")
+    print("\n========== PART 1 RESULTS ==========\n")
 
     features = [
-        "primary_artist_name",
-        "explicit",
-        "year_bin",
-        "popularity_bin",
-        "duration_bin",
-        "markets_bin",
+        "primary_artist_name", "explicit", "year_bin",
+        "popularity_bin", "duration_bin", "markets_bin"
     ]
     audio = [c for c in df_global.columns if c.startswith("ab_") and "mbid" not in c]
     features.extend(audio)
+
+    print(">>> TASK 1: Global Conditional Probabilities\n")
 
     for feat in features:
         print("\n" + "-" * 60)
@@ -452,61 +419,39 @@ def main():
         print("-" * 60)
 
         stats = calculate_smoothed_prob(df_global, feat)
-
         if len(stats) > 10:
-            print("Top 5:")
             print(stats.head(5)[["prob", "total_count"]])
-            print("\nBottom 3:")
             print(stats.tail(3)[["prob", "total_count"]])
         else:
             print(stats[["prob", "total_count"]])
 
     ensure_dir("artifacts")
 
-    features = [
-        "primary_artist_name",
-        "explicit",
-        "year_bin",
-        "popularity_bin",
-        "duration_bin",
-        "markets_bin",
-    ]
-    audio = [c for c in df_global.columns if c.startswith("ab_") and "mbid" not in c]
-    features.extend(audio)
-
-    # Global tekil conditional'lar
     export_single_feature_probs(
-        df_global,
-        features,
-        out_csv="artifacts/cond_probs_global.csv",
-        alpha=1
+        df_global, features,
+        out_csv="artifacts/cond_probs_global.csv"
     )
 
-    # Personal tekil conditional'lar (istersen)
     export_single_feature_probs(
-        df_personal,
-        features,
-        out_csv="artifacts/cond_probs_personal.csv",
-        alpha=1
+        df_personal, features,
+        out_csv="artifacts/cond_probs_personal.csv"
     )
 
-    # Top interactions
     export_top_interactions(
         df_global,
-        out_csv="artifacts/interactions_top.csv",
-        top_k=10,
-        min_count=30,
-        alpha=1
+        out_csv="artifacts/interactions_top.csv"
     )
 
-    # Bayes / posterior export
     export_posteriors_task3(
         df_global,
         out_csv="artifacts/posteriors.csv"
     )
 
-    # İstersen sadece minik bir bilgi bas:
     print("Wrote CSV artifacts to ./artifacts/")
+
+    run_task2(df_global)
+    run_task3(df_global)
+    run_task4(df_global, df_personal)
 
 
 if __name__ == "__main__":
