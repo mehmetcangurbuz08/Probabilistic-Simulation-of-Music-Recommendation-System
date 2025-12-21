@@ -6,191 +6,191 @@ P(artist | 5star),Adele,0.024498886414253896
 P(artist | 5star),Taylor Swift,0.022271714922048998
 P(artist | 5star),The Weeknd,0.022271714922048998
 P(artist | 5star),Lana Del Rey,0.0200445434298441
+P(artist | 5star),Queen,0.017817371937639197
+P(artist | 5star),Hozier,0.017817371937639197
+P(artist | 5star),Imagine Dragons,0.017817371937639197
 P(artist | 5star),Kanye West,0.017817371937639197
 P(artist | 5star),Kendrick Lamar,0.017817371937639197
-P(artist | 5star),Hozier,0.017817371937639197
-P(artist | 5star),Queen,0.017817371937639197
-P(artist | 5star),Imagine Dragons,0.017817371937639197
 P(artist | 5star),Pink Floyd,0.015590200445434299
 P(artist | 5star),Linkin Park,0.015590200445434299
+P(artist | 5star),Radiohead,0.013363028953229399
 P(artist | 5star),Tame Impala,0.013363028953229399
 P(artist | 5star),Lady Gaga,0.013363028953229399
-P(artist | 5star),Radiohead,0.013363028953229399
-P(artist | 5star),Mark Ronson,0.011135857461024499
-P(artist | 5star),Ariana Grande,0.011135857461024499
-P(artist | 5star),Fleetwood Mac,0.011135857461024499
 P(artist | 5star),Frank Ocean,0.011135857461024499
-P(artist | 5star),The Neighbourhood,0.011135857461024499
-P(artist | 5star),Travis Scott,0.011135857461024499
+P(artist | 5star),Ariana Grande,0.011135857461024499
 P(artist | 5star),Ed Sheeran,0.011135857461024499
-P(artist | 5star),Guns N' Roses,0.011135857461024499
+P(artist | 5star),The Neighbourhood,0.011135857461024499
+P(artist | 5star),Fleetwood Mac,0.011135857461024499
 P(artist | 5star),Metallica,0.011135857461024499
-P(artist | 5star),Michael Jackson,0.008908685968819599
-P(artist | 5star),Rihanna,0.008908685968819599
-P(artist | 5star),Harry Styles,0.008908685968819599
+P(artist | 5star),Travis Scott,0.011135857461024499
+P(artist | 5star),Mark Ronson,0.011135857461024499
+P(artist | 5star),Guns N' Roses,0.011135857461024499
 P(artist | 5star),The Beatles,0.008908685968819599
+P(artist | 5star),Rihanna,0.008908685968819599
+P(artist | 5star),Michael Jackson,0.008908685968819599
 P(artist | 5star),Flo Rida,0.008908685968819599
-P(artist | 5star),Olivia Rodrigo,0.008908685968819599
+P(artist | 5star),Harry Styles,0.008908685968819599
 P(artist | 5star),Post Malone,0.008908685968819599
+P(artist | 5star),Olivia Rodrigo,0.008908685968819599
+P(artist | 5star),Eagles,0.0066815144766146995
+P(artist | 5star),Lil Nas X,0.0066815144766146995
+P(artist | 5star),Dua Lipa,0.0066815144766146995
 P(artist | 5star),AC/DC,0.0066815144766146995
 P(artist | 5star),XXXTENTACION,0.0066815144766146995
-P(artist | 5star),Dua Lipa,0.0066815144766146995
-P(artist | 5star),Eagles,0.0066815144766146995
-P(artist | 5star),Led Zeppelin,0.0066815144766146995
-P(artist | 5star),Lil Nas X,0.0066815144766146995
-P(artist | 5star),Mac DeMarco,0.0066815144766146995
 P(artist | 5star),Coolio,0.0066815144766146995
-P(artist | 5star),Oasis,0.004454342984409799
-P(artist | 5star),Passenger,0.004454342984409799
-P(artist | 5star),Nicky Jam,0.004454342984409799
-P(artist | 5star),Surf Curse,0.004454342984409799
-P(artist | 5star),The Police,0.004454342984409799
-P(artist | 5star),Mitski,0.004454342984409799
-P(artist | 5star),Gorillaz,0.004454342984409799
-P(artist | 5star),Amy Winehouse,0.004454342984409799
-P(artist | 5star),Sean Paul,0.004454342984409799
-P(artist | 5star),Luis Fonsi,0.004454342984409799
+P(artist | 5star),Led Zeppelin,0.0066815144766146995
+P(artist | 5star),Mac DeMarco,0.0066815144766146995
+P(artist | 5star),ABBA,0.004454342984409799
+P(artist | 5star),Sam Smith,0.004454342984409799
+P(artist | 5star),"Tyler, The Creator",0.004454342984409799
 P(artist | 5star),Coldplay,0.004454342984409799
-P(artist | 5star),Lil Wayne,0.004454342984409799
-P(artist | 5star),Carly Rae Jepsen,0.004454342984409799
-P(artist | 5star),The Chainsmokers,0.004454342984409799
+P(artist | 5star),System Of A Down,0.004454342984409799
+P(artist | 5star),Luis Fonsi,0.004454342984409799
 P(artist | 5star),Black Eyed Peas,0.004454342984409799
-P(artist | 5star),Daft Punk,0.004454342984409799
-P(artist | 5star),BoyWithUke,0.004454342984409799
-P(artist | 5star),James Arthur,0.004454342984409799
-P(artist | 5star),Shakira,0.004454342984409799
+P(artist | 5star),Haddaway,0.004454342984409799
+P(artist | 5star),Topic,0.004454342984409799
 P(artist | 5star),Drake,0.004454342984409799
-P(artist | 5star),Katy Perry,0.004454342984409799
-P(artist | 5star),Red Hot Chili Peppers,0.004454342984409799
+P(artist | 5star),Demi Lovato,0.004454342984409799
+P(artist | 5star),Britney Spears,0.004454342984409799
+P(artist | 5star),Doja Cat,0.004454342984409799
+P(artist | 5star),Shakira,0.004454342984409799
+P(artist | 5star),Lil Wayne,0.004454342984409799
 P(artist | 5star),Nirvana,0.004454342984409799
-P(artist | 5star),Juice WRLD,0.004454342984409799
+P(artist | 5star),The Chainsmokers,0.004454342984409799
+P(artist | 5star),Sean Paul,0.004454342984409799
+P(artist | 5star),Red Hot Chili Peppers,0.004454342984409799
 P(artist | 5star),Creedence Clearwater Revival,0.004454342984409799
 P(artist | 5star),Dr. Dre,0.004454342984409799
 P(artist | 5star),Portugal. The Man,0.004454342984409799
-P(artist | 5star),Topic,0.004454342984409799
-P(artist | 5star),Avril Lavigne,0.004454342984409799
-P(artist | 5star),The Rolling Stones,0.004454342984409799
+P(artist | 5star),Amy Winehouse,0.004454342984409799
+P(artist | 5star),Katy Perry,0.004454342984409799
 P(artist | 5star),Rammstein,0.004454342984409799
-P(artist | 5star),Demi Lovato,0.004454342984409799
-P(artist | 5star),ABBA,0.004454342984409799
-P(artist | 5star),Doja Cat,0.004454342984409799
-P(artist | 5star),Haddaway,0.004454342984409799
-P(artist | 5star),System Of A Down,0.004454342984409799
-P(artist | 5star),Britney Spears,0.004454342984409799
-P(artist | 5star),Sam Smith,0.004454342984409799
+P(artist | 5star),Carly Rae Jepsen,0.004454342984409799
 P(artist | 5star),Cigarettes After Sex,0.004454342984409799
-P(artist | 5star),"Tyler, The Creator",0.004454342984409799
-P(artist | 5star),One Direction,0.0022271714922048997
-P(artist | 5star),Hoobastank,0.0022271714922048997
-P(artist | 5star),Joel Adams,0.0022271714922048997
-P(artist | 5star),Bon Jovi,0.0022271714922048997
-P(artist | 5star),Chief Keef,0.0022271714922048997
+P(artist | 5star),Nicky Jam,0.004454342984409799
+P(artist | 5star),Daft Punk,0.004454342984409799
+P(artist | 5star),Mitski,0.004454342984409799
+P(artist | 5star),Oasis,0.004454342984409799
+P(artist | 5star),Gorillaz,0.004454342984409799
+P(artist | 5star),James Arthur,0.004454342984409799
+P(artist | 5star),BoyWithUke,0.004454342984409799
+P(artist | 5star),Juice WRLD,0.004454342984409799
+P(artist | 5star),Passenger,0.004454342984409799
+P(artist | 5star),Surf Curse,0.004454342984409799
+P(artist | 5star),The Rolling Stones,0.004454342984409799
+P(artist | 5star),Avril Lavigne,0.004454342984409799
+P(artist | 5star),The Police,0.004454342984409799
+P(artist | 5star),Disturbed,0.0022271714922048997
+P(artist | 5star),Three Days Grace,0.0022271714922048997
+P(artist | 5star),Marshmello,0.0022271714922048997
+P(artist | 5star),Depeche Mode,0.0022271714922048997
+P(artist | 5star),Muse,0.0022271714922048997
+P(artist | 5star),Ghost,0.0022271714922048997
+P(artist | 5star),Keane,0.0022271714922048997
+P(artist | 5star),Joji,0.0022271714922048997
+P(artist | 5star),2Pac,0.0022271714922048997
+P(artist | 5star),Rick Astley,0.0022271714922048997
+P(artist | 5star),Skillet,0.0022271714922048997
+P(artist | 5star),The Cranberries,0.0022271714922048997
+P(artist | 5star),Macklemore,0.0022271714922048997
+P(artist | 5star),Camila Cabello,0.0022271714922048997
+P(artist | 5star),Chris Brown,0.0022271714922048997
+P(artist | 5star),"Earth, Wind & Fire",0.0022271714922048997
+P(artist | 5star),Mabel,0.0022271714922048997
+P(artist | 5star),Stephen Sanchez,0.0022271714922048997
+P(artist | 5star),Pharrell Williams,0.0022271714922048997
+P(artist | 5star),Cardi B,0.0022271714922048997
+P(artist | 5star),Galantis,0.0022271714922048997
+P(artist | 5star),Sia,0.0022271714922048997
+P(artist | 5star),Tones And I,0.0022271714922048997
+P(artist | 5star),Evanescence,0.0022271714922048997
+P(artist | 5star),JAY-Z,0.0022271714922048997
+P(artist | 5star),Avenged Sevenfold,0.0022271714922048997
+P(artist | 5star),Jesse & Joy,0.0022271714922048997
+P(artist | 5star),Avicii,0.0022271714922048997
+P(artist | 5star),Bob Marley & The Wailers,0.0022271714922048997
+P(artist | 5star),The White Stripes,0.0022271714922048997
+P(artist | 5star),The Smiths,0.0022271714922048997
+P(artist | 5star),Jawsh 685,0.0022271714922048997
+P(artist | 5star),Outkast,0.0022271714922048997
+P(artist | 5star),Alec Benjamin,0.0022271714922048997
+P(artist | 5star),Chord Overstreet,0.0022271714922048997
+P(artist | 5star),Lynyrd Skynyrd,0.0022271714922048997
+P(artist | 5star),Alok,0.0022271714922048997
+P(artist | 5star),Modjo,0.0022271714922048997
+P(artist | 5star),David Guetta,0.0022271714922048997
+P(artist | 5star),Korn,0.0022271714922048997
+P(artist | 5star),P!nk,0.0022271714922048997
+P(artist | 5star),Jessie J,0.0022271714922048997
+P(artist | 5star),GROUPLOVE,0.0022271714922048997
+P(artist | 5star),Shawn Mendes,0.0022271714922048997
+P(artist | 5star),Alex & Sierra,0.0022271714922048997
+P(artist | 5star),Maroon 5,0.0022271714922048997
+P(artist | 5star),Rixton,0.0022271714922048997
+P(artist | 5star),KAROL G,0.0022271714922048997
+P(artist | 5star),grandson,0.0022271714922048997
+P(artist | 5star),The Fray,0.0022271714922048997
+P(artist | 5star),Stromae,0.0022271714922048997
 P(artist | 5star),Sub Urban,0.0022271714922048997
-P(artist | 5star),Stevie Wonder,0.0022271714922048997
-P(artist | 5star),Foo Fighters,0.0022271714922048997
-P(artist | 5star),Lukas Graham,0.0022271714922048997
-P(artist | 5star),Justin Timberlake,0.0022271714922048997
-P(artist | 5star),Travie McCoy,0.0022271714922048997
-P(artist | 5star),Daryl Hall & John Oates,0.0022271714922048997
-P(artist | 5star),UB40,0.0022271714922048997
-P(artist | 5star),Lord Huron,0.0022271714922048997
-P(artist | 5star),Elton John,0.0022271714922048997
-P(artist | 5star),Rag'n'Bone Man,0.0022271714922048997
+P(artist | 5star),Offset,0.0022271714922048997
+P(artist | 5star),Vance Joy,0.0022271714922048997
+P(artist | 5star),Fort Minor,0.0022271714922048997
+P(artist | 5star),Cher,0.0022271714922048997
+P(artist | 5star),DJ Snake,0.0022271714922048997
+P(artist | 5star),Spice Girls,0.0022271714922048997
+P(artist | 5star),Chase Atlantic,0.0022271714922048997
+P(artist | 5star),THE SCOTTS,0.0022271714922048997
 P(artist | 5star),Jack Harlow,0.0022271714922048997
 P(artist | 5star),Twenty One Pilots,0.0022271714922048997
 P(artist | 5star),Franz Ferdinand,0.0022271714922048997
 P(artist | 5star),Florence + The Machine,0.0022271714922048997
 P(artist | 5star),Ice Cube,0.0022271714922048997
 P(artist | 5star),girl in red,0.0022271714922048997
-P(artist | 5star),ROSALÍA,0.0022271714922048997
-P(artist | 5star),50 Cent,0.0022271714922048997
-P(artist | 5star),Keala Settle,0.0022271714922048997
-P(artist | 5star),AURORA,0.0022271714922048997
-P(artist | 5star),Polo G,0.0022271714922048997
-P(artist | 5star),Bruno Mars,0.0022271714922048997
-P(artist | 5star),Playboi Carti,0.0022271714922048997
-P(artist | 5star),Maggie Lindemann,0.0022271714922048997
-P(artist | 5star),Eurythmics,0.0022271714922048997
-P(artist | 5star),Gotye,0.0022271714922048997
-P(artist | 5star),Daddy Yankee,0.0022271714922048997
-P(artist | 5star),Don Omar,0.0022271714922048997
-P(artist | 5star),Gabry Ponte,0.0022271714922048997
-P(artist | 5star),Neon Trees,0.0022271714922048997
-P(artist | 5star),Lewis Capaldi,0.0022271714922048997
-P(artist | 5star),Nelly Furtado,0.0022271714922048997
-P(artist | 5star),Paramore,0.0022271714922048997
-P(artist | 5star),LP,0.0022271714922048997
-P(artist | 5star),DJ Snake,0.0022271714922048997
-P(artist | 5star),THE SCOTTS,0.0022271714922048997
-P(artist | 5star),Chase Atlantic,0.0022271714922048997
-P(artist | 5star),Spice Girls,0.0022271714922048997
-P(artist | 5star),No Doubt,0.0022271714922048997
+P(artist | 5star),Foo Fighters,0.0022271714922048997
+P(artist | 5star),Stevie Wonder,0.0022271714922048997
+P(artist | 5star),Travie McCoy,0.0022271714922048997
+P(artist | 5star),Lukas Graham,0.0022271714922048997
+P(artist | 5star),Justin Timberlake,0.0022271714922048997
+P(artist | 5star),Rag'n'Bone Man,0.0022271714922048997
+P(artist | 5star),Elton John,0.0022271714922048997
+P(artist | 5star),Lord Huron,0.0022271714922048997
+P(artist | 5star),UB40,0.0022271714922048997
+P(artist | 5star),Joel Adams,0.0022271714922048997
+P(artist | 5star),Daryl Hall & John Oates,0.0022271714922048997
+P(artist | 5star),Hoobastank,0.0022271714922048997
+P(artist | 5star),One Direction,0.0022271714922048997
+P(artist | 5star),Bon Jovi,0.0022271714922048997
+P(artist | 5star),Chief Keef,0.0022271714922048997
 P(artist | 5star),Bebe Rexha,0.0022271714922048997
-P(artist | 5star),Cher,0.0022271714922048997
-P(artist | 5star),Fort Minor,0.0022271714922048997
+P(artist | 5star),ROSALÍA,0.0022271714922048997
+P(artist | 5star),LP,0.0022271714922048997
+P(artist | 5star),Don Omar,0.0022271714922048997
+P(artist | 5star),A$AP Rocky,0.0022271714922048997
 P(artist | 5star),Bad Bunny,0.0022271714922048997
 P(artist | 5star),21 Savage,0.0022271714922048997
 P(artist | 5star),Enrique Iglesias,0.0022271714922048997
 P(artist | 5star),Pop Smoke,0.0022271714922048997
 P(artist | 5star),CJ,0.0022271714922048997
 P(artist | 5star),SZA,0.0022271714922048997
-P(artist | 5star),Piso 21,0.0022271714922048997
 P(artist | 5star),BANNERS,0.0022271714922048997
+P(artist | 5star),Paramore,0.0022271714922048997
 P(artist | 5star),blackbear,0.0022271714922048997
-P(artist | 5star),Sia,0.0022271714922048997
-P(artist | 5star),Cardi B,0.0022271714922048997
-P(artist | 5star),Tones And I,0.0022271714922048997
-P(artist | 5star),Mabel,0.0022271714922048997
-P(artist | 5star),Vance Joy,0.0022271714922048997
-P(artist | 5star),Offset,0.0022271714922048997
-P(artist | 5star),Galantis,0.0022271714922048997
-P(artist | 5star),2Pac,0.0022271714922048997
-P(artist | 5star),Rick Astley,0.0022271714922048997
-P(artist | 5star),"Earth, Wind & Fire",0.0022271714922048997
-P(artist | 5star),Joji,0.0022271714922048997
-P(artist | 5star),JAY-Z,0.0022271714922048997
-P(artist | 5star),Avenged Sevenfold,0.0022271714922048997
-P(artist | 5star),Keane,0.0022271714922048997
-P(artist | 5star),Marshmello,0.0022271714922048997
-P(artist | 5star),The Fray,0.0022271714922048997
-P(artist | 5star),Korn,0.0022271714922048997
-P(artist | 5star),Stromae,0.0022271714922048997
-P(artist | 5star),Alex & Sierra,0.0022271714922048997
-P(artist | 5star),David Guetta,0.0022271714922048997
-P(artist | 5star),Avicii,0.0022271714922048997
-P(artist | 5star),Modjo,0.0022271714922048997
-P(artist | 5star),A$AP Rocky,0.0022271714922048997
-P(artist | 5star),Alok,0.0022271714922048997
-P(artist | 5star),Lynyrd Skynyrd,0.0022271714922048997
-P(artist | 5star),Bob Marley & The Wailers,0.0022271714922048997
-P(artist | 5star),Outkast,0.0022271714922048997
-P(artist | 5star),Jawsh 685,0.0022271714922048997
-P(artist | 5star),Jessie J,0.0022271714922048997
-P(artist | 5star),GROUPLOVE,0.0022271714922048997
-P(artist | 5star),Disturbed,0.0022271714922048997
-P(artist | 5star),Chris Brown,0.0022271714922048997
-P(artist | 5star),Maroon 5,0.0022271714922048997
-P(artist | 5star),Pharrell Williams,0.0022271714922048997
-P(artist | 5star),Stephen Sanchez,0.0022271714922048997
-P(artist | 5star),Macklemore,0.0022271714922048997
-P(artist | 5star),Shawn Mendes,0.0022271714922048997
-P(artist | 5star),Camila Cabello,0.0022271714922048997
-P(artist | 5star),Three Days Grace,0.0022271714922048997
-P(artist | 5star),The White Stripes,0.0022271714922048997
-P(artist | 5star),The Smiths,0.0022271714922048997
-P(artist | 5star),Alec Benjamin,0.0022271714922048997
-P(artist | 5star),Chord Overstreet,0.0022271714922048997
-P(artist | 5star),P!nk,0.0022271714922048997
-P(artist | 5star),Rixton,0.0022271714922048997
-P(artist | 5star),KAROL G,0.0022271714922048997
-P(artist | 5star),grandson,0.0022271714922048997
-P(artist | 5star),Jesse & Joy,0.0022271714922048997
-P(artist | 5star),Depeche Mode,0.0022271714922048997
-P(artist | 5star),Muse,0.0022271714922048997
-P(artist | 5star),Ghost,0.0022271714922048997
-P(artist | 5star),Skillet,0.0022271714922048997
-P(artist | 5star),The Cranberries,0.0022271714922048997
-P(artist | 5star),Evanescence,0.0022271714922048997
+P(artist | 5star),Piso 21,0.0022271714922048997
+P(artist | 5star),Daddy Yankee,0.0022271714922048997
+P(artist | 5star),Neon Trees,0.0022271714922048997
+P(artist | 5star),50 Cent,0.0022271714922048997
+P(artist | 5star),Gabry Ponte,0.0022271714922048997
+P(artist | 5star),Lewis Capaldi,0.0022271714922048997
+P(artist | 5star),No Doubt,0.0022271714922048997
+P(artist | 5star),Maggie Lindemann,0.0022271714922048997
+P(artist | 5star),Nelly Furtado,0.0022271714922048997
+P(artist | 5star),Eurythmics,0.0022271714922048997
+P(artist | 5star),Gotye,0.0022271714922048997
+P(artist | 5star),AURORA,0.0022271714922048997
+P(artist | 5star),Keala Settle,0.0022271714922048997
+P(artist | 5star),Bruno Mars,0.0022271714922048997
+P(artist | 5star),Polo G,0.0022271714922048997
+P(artist | 5star),Playboi Carti,0.0022271714922048997
 P(artist | 5star),Green Day,0.0022271714922048997
 P(ab_genre_dortmund_value | 5star),electronic,0.9732739420935412
 P(ab_genre_dortmund_value | 5star),folkcountry,0.013363028953229399

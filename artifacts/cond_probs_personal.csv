@@ -1,23 +1,23 @@
 feature,value,prob,total_count,success_count
 primary_artist_name,Adele,0.6666666666666666,1,1
-primary_artist_name,Kendrick Lamar,0.6666666666666666,1,1
 primary_artist_name,Queen,0.6666666666666666,1,1
+primary_artist_name,Kendrick Lamar,0.6666666666666666,1,1
 primary_artist_name,$uicideboy$,0.3333333333333333,1,0
-primary_artist_name,Bad Bunny,0.3333333333333333,1,0
-primary_artist_name,5 Seconds of Summer,0.3333333333333333,1,0
-primary_artist_name,Kanye West,0.3333333333333333,1,0
-primary_artist_name,"Earth, Wind & Fire",0.3333333333333333,1,0
-primary_artist_name,Katy Perry,0.3333333333333333,1,0
-primary_artist_name,MEDUZA,0.3333333333333333,1,0
-primary_artist_name,Macklemore & Ryan Lewis,0.3333333333333333,1,0
-primary_artist_name,Imagine Dragons,0.3333333333333333,1,0
 primary_artist_name,Marshmello,0.3333333333333333,1,0
-primary_artist_name,P!nk,0.3333333333333333,1,0
-primary_artist_name,Paramore,0.3333333333333333,1,0
-primary_artist_name,Post Malone,0.3333333333333333,1,0
-primary_artist_name,Rixton,0.3333333333333333,1,0
-primary_artist_name,Soulja Boy,0.3333333333333333,1,0
 primary_artist_name,The Calling,0.3333333333333333,1,0
+primary_artist_name,Soulja Boy,0.3333333333333333,1,0
+primary_artist_name,Rixton,0.3333333333333333,1,0
+primary_artist_name,Post Malone,0.3333333333333333,1,0
+primary_artist_name,Paramore,0.3333333333333333,1,0
+primary_artist_name,P!nk,0.3333333333333333,1,0
+primary_artist_name,Macklemore & Ryan Lewis,0.3333333333333333,1,0
+primary_artist_name,5 Seconds of Summer,0.3333333333333333,1,0
+primary_artist_name,MEDUZA,0.3333333333333333,1,0
+primary_artist_name,Katy Perry,0.3333333333333333,1,0
+primary_artist_name,Kanye West,0.3333333333333333,1,0
+primary_artist_name,Imagine Dragons,0.3333333333333333,1,0
+primary_artist_name,"Earth, Wind & Fire",0.3333333333333333,1,0
+primary_artist_name,Bad Bunny,0.3333333333333333,1,0
 primary_artist_name,XXXTENTACION,0.3333333333333333,1,0
 explicit,True,0.2222222222222222,7,1
 explicit,False,0.2,13,2
