@@ -79,8 +79,8 @@ TOPK = 5              # k for Hit@k
 WARMUP_SIZE = 20      # Warm-up songs per user (preference learning)
 
 # Global vs Personal weights
-GLOBAL_WEIGHT = 0.1   # Global P(5★) weight from Part 1
-PERSONAL_WEIGHT = 0.9 # User-track match weight
+GLOBAL_WEIGHT = 0.6   # Global P(5★) weight from Part 1
+PERSONAL_WEIGHT = 0.4 # User-track match weight
 
 
 def precompute_track_p5() -> Dict[str, float]:
