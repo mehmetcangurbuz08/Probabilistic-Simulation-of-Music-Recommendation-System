@@ -73,9 +73,9 @@ def load_data():
         return df
 
     try:
-        me = _load_personal("sarkilar.csv",seperate=";")
-        f1 = _load_personal("mehmet_ratings.csv",seperate=",")
-        f2 = _load_personal("furkan_ratings.csv",seperate=",")
+        me = _load_personal("/personal_ratings/sarkilar.csv",seperate=";")
+        f1 = _load_personal("/personal_ratings/mehmet_ratings.csv",seperate=",")
+        f2 = _load_personal("/personal_ratings/furkan_ratings.csv",seperate=",")
 
         print(f"Personal loaded: {len(me)} rows.")
         print(f"Friend 1 loaded: {len(f1)} rows.")
@@ -382,7 +382,7 @@ def plot_interaction_heatmap(interaction, title=None):
         ax.set_title(f"Interaction Heatmap: {f1} × {f2}")
 
     plt.tight_layout()
-    plt.savefig("heatmap_task2.png")
+    plt.savefig("plots/heatmap_task2.png")
 
 
 def run_task2(df):
@@ -505,7 +505,7 @@ def run_task3(df):
         print(f"\n[Comment]: {top_prob * 100:.1f}% are '{top_genre}'")
 
     plot_task3_two_posteriors(df)
-    plt.savefig("car_chart.png")
+    plt.savefig("plots/car_chart.png")
 
 
 # 8. TASK 4 — PERSONAL VS GLOBAL
@@ -592,7 +592,7 @@ def run_task4(df_global, df_personal, df_f1, df_f2):
     )
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig('piechart_for_each.png')
+    plt.savefig('plots/piechart_for_each.png')
 
 
     # 9. MAIN
