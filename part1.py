@@ -73,9 +73,9 @@ def load_data():
         return df
 
     try:
-        me = _load_personal("/personal_ratings/sarkilar.csv",seperate=";")
-        f1 = _load_personal("/personal_ratings/mehmet_ratings.csv",seperate=",")
-        f2 = _load_personal("/personal_ratings/furkan_ratings.csv",seperate=",")
+        me = _load_personal("personal_ratings/sarkilar.csv",seperate=";")
+        f1 = _load_personal("personal_ratings/mehmet_ratings.csv",seperate=",")
+        f2 = _load_personal("personal_ratings/furkan_ratings.csv",seperate=",")
 
         print(f"Personal loaded: {len(me)} rows.")
         print(f"Friend 1 loaded: {len(f1)} rows.")
